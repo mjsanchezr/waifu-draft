@@ -1,5 +1,9 @@
 # 💜 Waifu Draft
 
+🔴 **Jugar ahora**: https://waifu-draft.onrender.com
+(plan gratuito de Render — si nadie ha entrado en un rato tarda ~30-50s en
+despertar la primera vez que alguien abre el enlace)
+
 Juego de subastas en tiempo real para 2-4 jugadores. Cada jugador empieza con
 **$100**, se van subastando personajes uno a uno (el que más ofrece se lo
 lleva) hasta que todos tienen **5 waifus**. Después empieza la votación:
