@@ -32,6 +32,10 @@ class Room {
     this.pool = [];
     this.auction = null;
     this.voting = null;
+    this.settings = {
+      mode: 'choice', // choice (nominator picks) | random (auto-picked each round)
+      noSelfVote: true, // players can't vote for their own submitted waifu
+    };
     this.createdAt = Date.now();
     this.lastActivity = Date.now();
     this._timer = null;
@@ -125,6 +129,26 @@ class Room {
     return this.phase === 'lobby' && n >= 2 && n <= 4;
   }
 
+  updateSettings(playerId, patch) {
+    if (this.phase !== 'lobby') return { ok: false, error: 'game_in_progress' };
+    if (playerId !== this.hostId) return { ok: false, error: 'not_host' };
+
+    const next = { ...this.settings };
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'mode')) {
+      if (patch.mode !== 'choice' && patch.mode !== 'random') {
+        return { ok: false, error: 'invalid_mode' };
+      }
+      next.mode = patch.mode;
+    }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'noSelfVote')) {
+      next.noSelfVote = !!patch.noSelfVote;
+    }
+    this.settings = next;
+    this.touch();
+    this._emit();
+    return { ok: true };
+  }
+
   // ---------- Auction ----------
 
   startAuction() {
@@ -133,17 +157,33 @@ class Room {
     this.pool = freshPool();
     this.auction = {
       nominatorIndex: 0,
-      stage: 'nominating', // nominating | bidding
+      stage: 'nominating', // nominating | bidding | result
       character: null,
       highestBid: 0,
       highestBidderId: null,
       bidLog: [],
-      endsAt: Date.now() + NOMINATION_SECONDS * 1000,
+      endsAt: null,
     };
     this._advanceToEligibleNominator(0);
-    this._armTimer(NOMINATION_SECONDS, () => this._autoNominate());
+    this._beginNomination();
     this.touch();
     return true;
+  }
+
+  /** Opens the current nominator's turn: waits for a manual pick in "choice"
+   * mode, or auto-resolves instantly in "random" mode. */
+  _beginNomination() {
+    this.auction.stage = 'nominating';
+    this.auction.character = null;
+    this.auction.lastResult = null;
+    if (this.settings.mode === 'random') {
+      this.auction.endsAt = null;
+      this._autoNominate(); // resolves synchronously and emits its own state
+    } else {
+      this.auction.endsAt = Date.now() + NOMINATION_SECONDS * 1000;
+      this._armTimer(NOMINATION_SECONDS, () => this._autoNominate());
+      this._emit();
+    }
   }
 
   _slotsRemaining(player) {
@@ -279,12 +319,7 @@ class Room {
   _startNextNomination() {
     if (this.phase !== 'auction') return;
     this._advanceToEligibleNominator(this.auction.nominatorIndex + 1);
-    this.auction.stage = 'nominating';
-    this.auction.character = null;
-    this.auction.lastResult = null;
-    this.auction.endsAt = Date.now() + NOMINATION_SECONDS * 1000;
-    this._armTimer(NOMINATION_SECONDS, () => this._autoNominate());
-    this._emit();
+    this._beginNomination();
   }
 
   _checkAuctionComplete() {
@@ -336,6 +371,12 @@ class Room {
     if (this.phase !== 'voting') return { ok: false, error: 'not_voting' };
     const voter = this.players.get(voterId);
     if (!voter || !voter.connected) return { ok: false, error: 'invalid_voter' };
+    if (Object.prototype.hasOwnProperty.call(this.voting.votes, voterId)) {
+      return { ok: false, error: 'already_voted' };
+    }
+    if (this.settings.noSelfVote && candidatePlayerId === voterId) {
+      return { ok: false, error: 'self_vote_not_allowed' };
+    }
     const candidateInMatchup = this.voting.matchup.some((m) => m.playerId === candidatePlayerId);
     if (!candidateInMatchup) return { ok: false, error: 'invalid_candidate' };
 
@@ -457,6 +498,7 @@ class Room {
       players,
       you: forPlayerId || null,
       poolRemaining: this.pool.length,
+      settings: this.settings,
     };
 
     if (this.phase === 'auction' && this.auction) {

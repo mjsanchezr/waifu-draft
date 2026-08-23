@@ -71,6 +71,35 @@
       <h2>Sala de espera</h2>
       <ul id="lobby-players" class="player-list"></ul>
       <p id="lobby-hint" class="hint">Esperando a que se una más gente (mínimo 2, máximo 4)…</p>
+
+      <div class="settings-panel">
+        <h3>Configuración de la partida</h3>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Modo de juego</span>
+            <span class="hint">Cómo se elige qué personaje sale a subasta en cada turno.</span>
+          </div>
+          <div class="segmented" id="mode-segmented">
+            <button type="button" class="segmented-option" data-mode="choice">Elegir personaje</button>
+            <button type="button" class="segmented-option" data-mode="random">Aleatorio</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Prohibir autovoto</span>
+            <span class="hint">Nadie puede votar por su propia waifu en la ronda de votación.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-no-self-vote" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <p id="settings-readonly-hint" class="hint hidden">Solo el host puede cambiar la configuración.</p>
+      </div>
+
       <button id="btn-start" class="btn primary" disabled>Empezar subasta</button>
     </div>
   </section>
@@ -129,7 +158,7 @@
     <div class="voting-main">
       <div id="voting-timer-bar" class="timer-bar"><div class="timer-fill"></div></div>
       <h2 id="voting-round-title">Ronda 1 de 5</h2>
-      <p class="hint">¿Cuál es la mejor waifu de esta ronda? Vota tu favorita.</p>
+      <p id="voting-status" class="hint">¿Cuál es la mejor waifu de esta ronda? Vota tu favorita.</p>
       <div id="voting-matchup" class="matchup"></div>
     </div>
   </section>

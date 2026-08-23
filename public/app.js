@@ -50,6 +50,9 @@ const ERROR_MESSAGES = {
   not_voting: 'No hay votación activa.',
   invalid_candidate: 'Voto inválido.',
   not_finished: 'La partida todavía no ha terminado.',
+  invalid_mode: 'Modo de juego inválido.',
+  already_voted: 'Ya has votado en esta ronda — tu voto es definitivo.',
+  self_vote_not_allowed: 'No puedes votar por tu propia waifu en esta partida.',
 };
 function errorMessage(code) {
   return ERROR_MESSAGES[code] || 'Algo salió mal.';
@@ -241,7 +244,42 @@ function renderLobby(state) {
   if (n < 2) hint.textContent = 'Esperando a que se una al menos un jugador más (mínimo 2)…';
   else if (isHost) hint.textContent = 'Ya podéis empezar cuando queráis (o esperar a más gente, máx. 4).';
   else hint.textContent = 'Esperando a que el host empiece la subasta…';
+
+  renderSettingsPanel(state, isHost);
 }
+
+function renderSettingsPanel(state, isHost) {
+  const settings = state.settings || { mode: 'choice', noSelfVote: true };
+
+  document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.mode === settings.mode);
+    btn.disabled = !isHost;
+  });
+
+  const selfVoteCheckbox = document.getElementById('setting-no-self-vote');
+  selfVoteCheckbox.checked = settings.noSelfVote;
+  selfVoteCheckbox.disabled = !isHost;
+
+  document.getElementById('settings-readonly-hint').classList.toggle('hidden', isHost);
+}
+
+document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    socket.emit('updateSettings', { mode: btn.dataset.mode }, (res) => {
+      if (!res.ok) toast(errorMessage(res.error), true);
+    });
+  });
+});
+
+document.getElementById('setting-no-self-vote').addEventListener('change', (e) => {
+  socket.emit('updateSettings', { noSelfVote: e.target.checked }, (res) => {
+    if (!res.ok) {
+      toast(errorMessage(res.error), true);
+      e.target.checked = !e.target.checked; // revert optimistic UI on rejection
+    }
+  });
+});
 
 document.getElementById('btn-copy-code').addEventListener('click', () => {
   if (!latestState) return;
@@ -403,27 +441,44 @@ function renderVoting(state) {
   const totalVotes = voteValues.length || 1;
 
   const myVote = v.votes[myPlayerId];
+  const hasVoted = myVote !== undefined;
+  const noSelfVote = !!(state.settings && state.settings.noSelfVote);
+
+  const statusEl = document.getElementById('voting-status');
+  if (hasVoted) statusEl.textContent = 'Ya has votado en esta ronda — espera a que voten los demás.';
+  else if (noSelfVote) statusEl.textContent = '¿Cuál es la mejor waifu de esta ronda? Vota tu favorita (no puedes votar la tuya).';
+  else statusEl.textContent = '¿Cuál es la mejor waifu de esta ronda? Vota tu favorita.';
 
   const container = document.getElementById('voting-matchup');
   container.innerHTML = '';
   for (const m of v.matchup) {
     const count = tally[m.playerId] || 0;
     const pct = Math.round((count / totalVotes) * 100);
+    const isOwn = m.playerId === myPlayerId;
+    const isBlocked = (noSelfVote && isOwn) || hasVoted;
     const card = document.createElement('div');
-    card.className = 'candidate' + (myVote === m.playerId ? ' voted' : '');
+    card.className = [
+      'candidate',
+      myVote === m.playerId ? 'voted' : '',
+      noSelfVote && isOwn ? 'own' : '',
+      isBlocked ? 'locked' : '',
+    ].filter(Boolean).join(' ');
     card.innerHTML = `
       <img class="c-portrait" src="${m.character.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />
       <div class="c-anime">${escapeHtml(m.character.anime)}</div>
       <div class="c-name">${escapeHtml(m.character.name)}</div>
-      <div class="c-owner">de ${escapeHtml(playerName(state, m.playerId))}</div>
+      <div class="c-owner">de ${escapeHtml(playerName(state, m.playerId))}${isOwn ? ' (tú)' : ''}</div>
+      ${noSelfVote && isOwn ? '<div class="c-blocked-tag">No puedes votar tu propia waifu</div>' : ''}
       <div class="c-bar"><div class="c-bar-fill" style="width:${pct}%"></div></div>
       <div class="c-votes">${count} voto${count === 1 ? '' : 's'}</div>
     `;
-    card.addEventListener('click', () => {
-      socket.emit('castVote', { candidatePlayerId: m.playerId }, (res) => {
-        if (!res.ok) toast(errorMessage(res.error), true);
+    if (!isBlocked) {
+      card.addEventListener('click', () => {
+        socket.emit('castVote', { candidatePlayerId: m.playerId }, (res) => {
+          if (!res.ok) toast(errorMessage(res.error), true);
+        });
       });
-    });
+    }
     container.appendChild(card);
   }
 }

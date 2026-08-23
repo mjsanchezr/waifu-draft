@@ -96,6 +96,13 @@ io.on('connection', (socket) => {
     return socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
   }
 
+  socket.on('updateSettings', (patch, ack) => {
+    const room = currentRoom();
+    if (!room) return ack && ack({ ok: false, error: 'no_room' });
+    const result = room.updateSettings(socket.data.playerId, patch);
+    ack && ack(result);
+  });
+
   socket.on('startGame', (_payload, ack) => {
     const room = currentRoom();
     if (!room) return ack && ack({ ok: false, error: 'no_room' });
