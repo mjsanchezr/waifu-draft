@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: waifu-draft
+    runtime: docker
+    plan: free
+    region: oregon
+    autoDeploy: true
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production

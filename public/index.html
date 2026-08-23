@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Waifu Draft</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💜</text></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- SCREEN: HOME -->
+  <section id="screen-home" class="screen active">
+    <div class="home-card">
+      <h1>💜 Waifu Draft</h1>
+      <p class="tagline">Subasta a tus waifus favoritas. Presupuesto: $100. Máximo 5 por jugador. 2-4 jugadores.</p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="create">Crear sala</button>
+        <button class="tab" data-tab="join">Unirse a sala</button>
+      </div>
+
+      <form id="form-create" class="tab-panel active">
+        <label>Tu nombre
+          <input type="text" id="create-name" maxlength="20" placeholder="Ej. Mario" required />
+        </label>
+        <button type="submit" class="btn primary">Crear sala</button>
+      </form>
+
+      <form id="form-join" class="tab-panel">
+        <label>Tu nombre
+          <input type="text" id="join-name" maxlength="20" placeholder="Ej. Mario" required />
+        </label>
+        <label>Código de sala
+          <input type="text" id="join-code" maxlength="4" placeholder="ABCD" autocapitalize="characters" required />
+        </label>
+        <button type="submit" class="btn primary">Unirse</button>
+      </form>
+
+      <p class="hint">Se abre en varios dispositivos: cada jugador entra desde su propio móvil u ordenador con el mismo código.</p>
+    </div>
+  </section>
+
+  <!-- SCREEN: LOBBY -->
+  <section id="screen-lobby" class="screen">
+    <div class="topbar">
+      <div class="room-code">Sala <span id="lobby-code">----</span> <button id="btn-copy-code" class="btn tiny" title="Copiar código">📋</button></div>
+    </div>
+    <div class="lobby-card">
+      <h2>Sala de espera</h2>
+      <ul id="lobby-players" class="player-list"></ul>
+      <p id="lobby-hint" class="hint">Esperando a que se una más gente (mínimo 2, máximo 4)…</p>
+      <button id="btn-start" class="btn primary" disabled>Empezar subasta</button>
+    </div>
+  </section>
+
+  <!-- SCREEN: AUCTION -->
+  <section id="screen-auction" class="screen">
+    <div class="topbar" id="auction-players"></div>
+
+    <div class="auction-main">
+      <div id="auction-timer-bar" class="timer-bar"><div class="timer-fill"></div></div>
+
+      <div id="auction-nominating" class="panel">
+        <h2 id="nominating-title">Turno de nominar</h2>
+        <p id="nominating-sub" class="hint"></p>
+        <div class="pool-filter">
+          <input type="text" id="pool-search" placeholder="Buscar personaje o anime…" />
+        </div>
+        <div id="pool-list" class="pool-list"></div>
+      </div>
+
+      <div id="auction-bidding" class="panel hidden">
+        <div class="char-card" id="char-card">
+          <div class="char-anime" id="char-anime"></div>
+          <div class="char-name" id="char-name"></div>
+        </div>
+        <div class="bid-status">
+          <div class="bid-current">
+            Puja actual: <span id="bid-amount">$0</span>
+            <span id="bid-leader" class="bid-leader"></span>
+          </div>
+        </div>
+        <div id="bid-controls" class="bid-controls">
+          <button class="btn chip" data-bid-delta="1">+$1</button>
+          <button class="btn chip" data-bid-delta="5">+$5</button>
+          <button class="btn chip" data-bid-delta="10">+$10</button>
+          <button class="btn chip" id="btn-bid-max">Máximo</button>
+          <div class="bid-custom">
+            <input type="number" id="bid-input" min="1" step="1" />
+            <button class="btn primary" id="btn-bid-custom">Pujar</button>
+          </div>
+        </div>
+        <p id="bid-help" class="hint"></p>
+        <div id="bid-log" class="bid-log"></div>
+      </div>
+
+      <div id="auction-result" class="panel hidden">
+        <h2 id="result-title"></h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: VOTING -->
+  <section id="screen-voting" class="screen">
+    <div class="topbar" id="voting-scoreboard"></div>
+    <div class="voting-main">
+      <div id="voting-timer-bar" class="timer-bar"><div class="timer-fill"></div></div>
+      <h2 id="voting-round-title">Ronda 1 de 5</h2>
+      <p class="hint">¿Cuál es la mejor waifu de esta ronda? Vota tu favorita.</p>
+      <div id="voting-matchup" class="matchup"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN: RESULTS -->
+  <section id="screen-results" class="screen">
+    <div class="results-main">
+      <h1>🏆 Resultados finales</h1>
+      <div id="final-standings" class="standings"></div>
+      <div id="final-rosters" class="rosters"></div>
+      <button id="btn-play-again" class="btn primary hidden">Jugar otra vez</button>
+      <p id="results-hint" class="hint"></p>
+    </div>
+  </section>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
