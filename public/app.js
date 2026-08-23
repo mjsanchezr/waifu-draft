@@ -199,10 +199,11 @@ function renderPlayersTopbar(elId, state, opts = {}) {
       const score = (state.voting && state.voting.scores[p.id]) || 0;
       extra = `<div class="pc-budget">${score} pt${score === 1 ? '' : 's'}</div>`;
     } else {
-      const slots = Array.from(
-        { length: 5 },
-        (_, i) => `<span class="slot-dot ${i < p.roster.length ? 'filled' : ''}"></span>`
-      ).join('');
+      const slots = Array.from({ length: 5 }, (_, i) => {
+        const owned = p.roster[i];
+        const style = owned ? ` style="background-image:url('${owned.image || ''}')"` : '';
+        return `<span class="slot-dot ${owned ? 'filled' : ''}"${style} title="${owned ? escapeHtml(owned.name) : ''}"></span>`;
+      }).join('');
       extra = `<div class="pc-budget">$${p.budget}</div><div class="pc-slots">${slots}</div>`;
     }
 
@@ -224,8 +225,8 @@ function renderLobby(state) {
   for (const p of state.players) {
     const li = document.createElement('li');
     li.innerHTML = `
-      <span>${escapeHtml(p.name)}${p.id === myPlayerId ? ' (tú)' : ''}${p.isHost ? ' 👑' : ''}</span>
-      <span>${p.connected ? '🟢' : '⚪'}</span>
+      <span>${escapeHtml(p.name)}${p.id === myPlayerId ? ' (tú)' : ''}${p.isHost ? ' <span class="host-badge">HOST</span>' : ''}</span>
+      <span class="status-dot ${p.connected ? 'online' : ''}"></span>
     `;
     list.appendChild(li);
   }
@@ -292,6 +293,8 @@ function renderAuction(state) {
     bidPanel.classList.remove('hidden');
     armTimer('auction-timer-bar', a.endsAt);
 
+    document.getElementById('char-portrait').src = a.character.image || '';
+    document.getElementById('char-portrait').alt = a.character.name;
     document.getElementById('char-anime').textContent = a.character.anime;
     document.getElementById('char-name').textContent = a.character.name;
     document.getElementById('bid-amount').textContent = `$${a.highestBid}`;
@@ -341,7 +344,13 @@ function renderPool(state, clickable) {
   for (const c of pool) {
     const item = document.createElement('div');
     item.className = 'pool-item' + (clickable ? '' : ' disabled');
-    item.innerHTML = `<div class="pi-name">${escapeHtml(c.name)}</div><div class="pi-anime">${escapeHtml(c.anime)}</div>`;
+    item.innerHTML = `
+      <img class="pi-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />
+      <div>
+        <div class="pi-name">${escapeHtml(c.name)}</div>
+        <div class="pi-anime">${escapeHtml(c.anime)}</div>
+      </div>
+    `;
     if (clickable) {
       item.addEventListener('click', () => {
         socket.emit('nominate', { characterId: c.id }, (res) => {
@@ -403,6 +412,7 @@ function renderVoting(state) {
     const card = document.createElement('div');
     card.className = 'candidate' + (myVote === m.playerId ? ' voted' : '');
     card.innerHTML = `
+      <img class="c-portrait" src="${m.character.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />
       <div class="c-anime">${escapeHtml(m.character.anime)}</div>
       <div class="c-name">${escapeHtml(m.character.name)}</div>
       <div class="c-owner">de ${escapeHtml(playerName(state, m.playerId))}</div>
@@ -420,27 +430,36 @@ function renderVoting(state) {
 
 // ---------- results ----------
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const RANK_CLASSES = ['gold', 'silver', 'bronze'];
 
 function renderResults(state) {
   const r = state.results;
 
   const standingsEl = document.getElementById('final-standings');
   standingsEl.innerHTML = r.standings
-    .map(
-      (s, i) => `
+    .map((s, i) => {
+      const badgeClass = RANK_CLASSES[i] || '';
+      return `
       <div class="standing-row ${i === 0 ? 'rank-1' : ''}">
-        <span>${MEDALS[i] || `#${i + 1}`} ${escapeHtml(s.name)}${s.playerId === myPlayerId ? ' (tú)' : ''}</span>
+        <span class="sr-left">
+          <span class="rank-badge ${badgeClass}">${i + 1}</span>
+          ${escapeHtml(s.name)}${s.playerId === myPlayerId ? ' (tú)' : ''}
+        </span>
         <span>${s.score} ronda${s.score === 1 ? '' : 's'} ganada${s.score === 1 ? '' : 's'}</span>
-      </div>`
-    )
+      </div>`;
+    })
     .join('');
 
   const rostersEl = document.getElementById('final-rosters');
   rostersEl.innerHTML = r.standings
     .map((s) => {
       const items = s.roster
-        .map((c) => `<div class="rb-item"><span>${escapeHtml(c.name)} (${escapeHtml(c.anime)})</span><span>$${c.price}</span></div>`)
+        .map(
+          (c) => `<div class="rb-item">
+            <span class="rb-left"><img class="rb-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /> ${escapeHtml(c.name)} (${escapeHtml(c.anime)})</span>
+            <span>$${c.price}</span>
+          </div>`
+        )
         .join('');
       return `<div class="roster-block"><h3>${escapeHtml(s.name)} · $${s.budgetLeft} sin gastar</h3>${items}</div>`;
     })

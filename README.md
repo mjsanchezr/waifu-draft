@@ -12,7 +12,15 @@ luego las segundas, etc. La que más votos reciba en cada ronda suma un punto
 para su dueño. Gana quien más rondas se lleve.
 
 Incluye 53 personajes de 30 animes distintos (Re:Zero, SxF, AoT, Bleach,
-Fairy Tail, One Piece, Jujutsu Kaisen, Frieren, Chainsaw Man, y más).
+Fairy Tail, One Piece, Jujutsu Kaisen, Frieren, Chainsaw Man, y más), cada
+uno con su imagen oficial.
+
+**Imágenes**: los retratos se enlazan directamente desde el CDN público de
+[AniList](https://anilist.co) (`s4.anilist.co`), que expone su API
+justamente para que apps de terceros muestren estas imágenes — no se
+redistribuyen copias en este repo. Si AniList cambiara o retirase alguna
+URL, el personaje afectado simplemente se quedaría sin miniatura; el resto
+del juego sigue funcionando igual.
 
 ## Cómo jugar
 

@@ -33,6 +33,10 @@ body {
 
 h1, h2, h3 { margin: 0 0 8px; }
 
+.icon { flex-shrink: 0; display: inline-block; vertical-align: middle; }
+.brand { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
+.brand .icon { width: 34px; height: 34px; }
+
 .hint { color: var(--text-dim); font-size: 0.88rem; }
 
 button { font-family: inherit; }
@@ -133,13 +137,24 @@ label {
 .player-chip.disconnected { opacity: 0.45; }
 .player-chip .pc-name { font-weight: 600; display: flex; align-items: center; gap: 6px; }
 .player-chip .pc-budget { color: var(--good); font-weight: 600; }
-.player-chip .pc-slots { display: flex; gap: 3px; margin-top: 6px; }
+.player-chip .pc-slots { display: flex; gap: 4px; margin-top: 6px; }
 .slot-dot {
-  width: 10px; height: 10px; border-radius: 50%;
+  width: 16px; height: 16px; border-radius: 50%;
   background: var(--border);
+  background-size: cover;
+  background-position: center top;
+  border: 1px solid transparent;
 }
-.slot-dot.filled { background: var(--accent-2); }
+.slot-dot.filled { border-color: var(--accent-2); }
 .host-badge { font-size: 0.7rem; background: var(--accent); color: #1a0f2c; border-radius: 6px; padding: 1px 5px; }
+
+.status-dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+.status-dot.online { background: var(--good); }
 
 .room-code {
   font-size: 1.3rem;
@@ -210,24 +225,46 @@ label {
   padding-right: 4px;
 }
 .pool-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   border-radius: 10px;
-  padding: 10px;
+  padding: 8px;
   cursor: pointer;
   border: 1px solid var(--border);
   background: var(--bg-alt);
   font-size: 0.85rem;
 }
 .pool-item:hover { border-color: var(--accent); }
+.pool-item .pi-thumb {
+  width: 42px; height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: center top;
+  flex-shrink: 0;
+  background: var(--card-hi);
+}
 .pool-item .pi-name { font-weight: 600; }
 .pool-item .pi-anime { color: var(--text-dim); font-size: 0.75rem; }
 .pool-item.disabled { opacity: 0.35; cursor: not-allowed; }
 
 .char-card {
   border-radius: var(--radius);
-  padding: 28px 20px;
+  padding: 20px;
   text-align: center;
   margin-bottom: 16px;
   background: linear-gradient(135deg, var(--accent-2), var(--accent));
+}
+.char-portrait {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center top;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.15);
 }
 .char-anime { font-size: 0.9rem; opacity: 0.85; }
 .char-name { font-size: 1.8rem; font-weight: 800; margin-top: 4px; }
@@ -272,6 +309,15 @@ label {
 }
 .candidate:hover { border-color: var(--accent); }
 .candidate.voted { border-color: var(--accent); box-shadow: 0 0 16px -4px var(--accent); }
+.candidate .c-portrait {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: var(--bg-alt);
+}
 .candidate .c-anime { font-size: 0.75rem; color: var(--text-dim); }
 .candidate .c-name { font-size: 1.15rem; font-weight: 700; margin: 6px 0; }
 .candidate .c-owner { font-size: 0.8rem; color: var(--accent-2); }
@@ -292,14 +338,41 @@ label {
   padding: 12px 16px;
 }
 .standing-row.rank-1 { border-color: var(--accent); box-shadow: 0 0 16px -4px var(--accent); }
+.standing-row .sr-left { display: flex; align-items: center; gap: 10px; }
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1a0f2c;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.rank-badge.gold { background: linear-gradient(135deg, #ffe27a, #d89b1c); }
+.rank-badge.silver { background: linear-gradient(135deg, #f1f1f1, #a7a7b3); }
+.rank-badge.bronze { background: linear-gradient(135deg, #e8b27a, #a15c2c); }
+
 .rosters { text-align: left; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
 .roster-block h3 { font-size: 1rem; }
 .roster-block .rb-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   font-size: 0.85rem;
-  padding: 4px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
+}
+.roster-block .rb-left { display: flex; align-items: center; gap: 8px; }
+.rb-thumb {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  background: var(--card-hi);
+  flex-shrink: 0;
 }
 
 .toast {
