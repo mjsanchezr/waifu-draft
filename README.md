@@ -12,9 +12,10 @@ primeras waifus de cada jugador entre sí, luego las segundas, etc. La que
 más votos reciba en cada ronda suma un punto para su dueño. Gana quien más
 rondas se lleve.
 
-Incluye 92 personajes de 55 animes distintos (Re:Zero, SxF, AoT, Bleach,
+Incluye 114 personajes de 69 animes distintos (Re:Zero, SxF, AoT, Bleach,
 Fairy Tail, One Piece, Jujutsu Kaisen, Frieren, Chainsaw Man, Fate/stay
-night, Code Geass, KonoSuba, Overlord, y muchos más), cada uno con su
+night, Code Geass, KonoSuba, Overlord, Sailor Moon, Madoka Magica, Studio
+Ghibli, y muchos más), cada uno con su
 imagen oficial.
 
 **Imágenes**: los retratos se enlazan directamente desde el CDN público de
@@ -38,9 +39,10 @@ espera):
 - **Waifus por jugador**: de 3 a 10, en vez del 5 fijo original.
 - **Prohibir autovoto**: activado por defecto — nadie puede votar por su
   propia waifu en la ronda de votación.
-- **Incluir personajes troll**: mezcla en la subasta fichajes de broma que
-  no son waifus en absoluto (Tony Tony Chopper, Speedwagon, Ryuk, Saitama,
-  Korosensei, y más) — apagado por defecto.
+- **Incluir personajes troll**: mezcla en la subasta 17 fichajes de broma
+  que no son waifus en absoluto (Tony Tony Chopper, Speedwagon, Ryuk,
+  Saitama, Korosensei, Usopp, Rock Lee, el perro Bond, y más) — apagado por
+  defecto.
 
 **Durante la subasta**, cualquiera puede pulsar "Saltar" para decir que no
 le interesa la waifu en juego; en cuanto pujas, ya no puedes saltar. Si

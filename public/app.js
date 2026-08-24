@@ -30,15 +30,33 @@ const SHOWCASE_IMAGES = [
   'https://s4.anilist.co/file/anilistcdn/character/large/b89361-tq8PQQ4MmF0M.png', // Megumin
 ];
 
+const BACKDROP_CELL_W = 113; // 110px min column + 3px gap
+const BACKDROP_CELL_H = 133; // 130px row + 3px gap
+
 function renderBackdrop(elId) {
   const el = document.getElementById(elId);
+  // Only (re)build once the element actually has layout — an inactive
+  // screen (e.g. the lobby before you've joined a room) reports a 0x0 box,
+  // so we'd otherwise under-fill it. Skip silently; whoever makes the
+  // screen visible is responsible for calling this again.
   if (!el || el.childElementCount > 0) return;
-  // Shuffle a copy so home/lobby don't show the exact same tile order, then
-  // tile it out to enough cells to cover tall/wide viewports (the grid's
-  // implicit row count depends on how many items it's given).
+  const wrap = el.parentElement;
+  const rect = wrap.getBoundingClientRect();
+  if (rect.width < 10 || rect.height < 10) return;
+
+  // The grid itself renders at 120% of its wrap (see CSS) so it has room to
+  // pan without ever exposing a bare edge — size the tile count off that
+  // larger virtual canvas, not the visible viewport, or tall/wide screens
+  // would show empty space past whatever a fixed guess covered.
+  const gridWidth = rect.width * 1.2;
+  const gridHeight = rect.height * 1.2;
+  const cols = Math.ceil(gridWidth / BACKDROP_CELL_W) + 1;
+  const rows = Math.ceil(gridHeight / BACKDROP_CELL_H) + 1;
+  const tileCount = Math.max(24, cols * rows);
+
+  // Shuffle a copy so home/lobby don't show the exact same tile order.
   const shuffled = [...SHOWCASE_IMAGES].sort(() => Math.random() - 0.5);
-  const TILE_COUNT = 64;
-  const tiles = Array.from({ length: TILE_COUNT }, (_, i) => shuffled[i % shuffled.length]);
+  const tiles = Array.from({ length: tileCount }, (_, i) => shuffled[i % shuffled.length]);
   el.innerHTML = tiles
     .map(
       (src, i) =>
@@ -47,7 +65,6 @@ function renderBackdrop(elId) {
     .join('');
 }
 renderBackdrop('home-backdrop');
-renderBackdrop('lobby-backdrop');
 
 // ---------- helpers ----------
 
@@ -264,6 +281,7 @@ function renderPlayersTopbar(elId, state, opts = {}) {
 // ---------- lobby ----------
 
 function renderLobby(state) {
+  renderBackdrop('lobby-backdrop'); // no-op after the first call; needs the screen to already be visible/laid out
   document.getElementById('lobby-code').textContent = state.code;
 
   const list = document.getElementById('lobby-players');
@@ -466,9 +484,14 @@ function renderAuction(state) {
     resPanel.classList.remove('hidden');
     armTimer('auction-timer-bar', null);
     const r = a.lastResult;
+    document.getElementById('result-portrait').src = r.character.image || '';
+    document.getElementById('result-portrait').alt = r.character.name;
+    document.getElementById('result-anime').textContent = r.character.anime;
+    document.getElementById('result-name').textContent = r.character.name;
+    document.getElementById('result-troll-badge').classList.toggle('hidden', !r.character.isTroll);
     document.getElementById('result-title').textContent = r.winnerId
-      ? `${r.character.name} (${r.character.anime}) → ¡se la lleva ${playerName(state, r.winnerId)} por $${r.price}!`
-      : `Nadie pujó por ${r.character.name}. Vuelve a la reserva.`;
+      ? `¡Se la lleva ${playerName(state, r.winnerId)} por $${r.price}!`
+      : `Nadie pujó. Vuelve a la reserva.`;
   }
 }
 
