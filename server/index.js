@@ -126,6 +126,29 @@ io.on('connection', (socket) => {
     ack && ack(result);
   });
 
+  socket.on('skipBid', (_payload, ack) => {
+    const room = currentRoom();
+    if (!room) return ack && ack({ ok: false, error: 'no_room' });
+    const result = room.skip(socket.data.playerId);
+    ack && ack(result);
+  });
+
+  socket.on('leaveRoom', (_payload, ack) => {
+    const room = currentRoom();
+    if (!room) return ack && ack({ ok: false, error: 'no_room' });
+    const result = room.leaveRoom(socket.data.playerId);
+    if (result.ok) {
+      socket.leave(room.code);
+      socket.data.roomCode = null;
+      socket.data.playerId = null;
+      if (result.empty) {
+        room.destroy();
+        rooms.delete(room.code);
+      }
+    }
+    ack && ack(result);
+  });
+
   socket.on('castVote', ({ candidatePlayerId } = {}, ack) => {
     const room = currentRoom();
     if (!room) return ack && ack({ ok: false, error: 'no_room' });

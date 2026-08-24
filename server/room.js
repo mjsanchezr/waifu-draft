@@ -129,6 +129,27 @@ class Room {
     return this.phase === 'lobby' && n >= 2 && n <= 4;
   }
 
+  leaveRoom(playerId) {
+    if (this.phase !== 'lobby') return { ok: false, error: 'game_in_progress' };
+    if (!this.players.has(playerId)) return { ok: false, error: 'invalid_player' };
+
+    this.players.delete(playerId);
+    this.playerOrder = this.playerOrder.filter((pid) => pid !== playerId);
+
+    if (this.hostId === playerId) {
+      const next = this.playerOrder
+        .map((pid) => this.players.get(pid))
+        .find((p) => p && p.connected);
+      this.hostId = next ? next.id : null;
+      if (next) next.isHost = true;
+    }
+
+    this.touch();
+    const empty = this.players.size === 0;
+    if (!empty) this._emit();
+    return { ok: true, empty };
+  }
+
   updateSettings(playerId, patch) {
     if (this.phase !== 'lobby') return { ok: false, error: 'game_in_progress' };
     if (playerId !== this.hostId) return { ok: false, error: 'not_host' };
@@ -237,6 +258,7 @@ class Room {
     this.auction.highestBid = 0;
     this.auction.highestBidderId = null;
     this.auction.bidLog = [];
+    this.auction.skipped = new Set();
     this.auction.endsAt = Date.now() + BIDDING_SECONDS * 1000;
     this._armTimer(BIDDING_SECONDS, () => this._finalizeAuction());
     this.touch();
@@ -277,6 +299,7 @@ class Room {
     this.auction.highestBid = amount;
     this.auction.highestBidderId = player.id;
     this.auction.bidLog.push({ playerId: player.id, amount, at: Date.now() });
+    this.auction.skipped.delete(player.id); // bidding after a skip un-skips you
 
     // Anti-snipe: if under ANTI_SNIPE_SECONDS left, extend the clock.
     const remainingMs = this.auction.endsAt - Date.now();
@@ -287,6 +310,51 @@ class Room {
 
     this.touch();
     this._emit();
+
+    // Safe to auto-finalize here too: _allBiddersDecided() only counts the
+    // *current* leader as settled, so an outbid player (not the leader, and
+    // unable to skip once they've bid) always keeps the round open for
+    // themselves — this only fires when literally everyone else has
+    // explicitly skipped, e.g. skip -> skip -> bid ordering.
+    if (this._allBiddersDecided()) {
+      this._clearTimer();
+      this._finalizeAuction();
+    }
+    return { ok: true };
+  }
+
+  _eligibleBidders() {
+    return this.connectedPlayers().filter((p) => this._slotsRemaining(p) > 0);
+  }
+
+  /** True once every eligible bidder is either the current leader (nothing
+   * more for them to do unless someone outbids them) or has explicitly
+   * skipped. A player who bid and then got outbid is neither — they can't
+   * skip anymore, but they're not "decided" either, so the round correctly
+   * keeps running instead of being cut short on them. */
+  _allBiddersDecided() {
+    if (!this.auction || this.auction.stage !== 'bidding') return false;
+    const leaderId = this.auction.highestBidderId;
+    return this._eligibleBidders().every((p) => p.id === leaderId || this.auction.skipped.has(p.id));
+  }
+
+  skip(playerId) {
+    if (!this.auction || this.auction.stage !== 'bidding') return { ok: false, error: 'not_bidding' };
+    const player = this.players.get(playerId);
+    if (!player || !player.connected) return { ok: false, error: 'invalid_player' };
+    if (this._slotsRemaining(player) <= 0) return { ok: false, error: 'roster_full' };
+    if (this.auction.bidLog.some((b) => b.playerId === playerId)) {
+      return { ok: false, error: 'already_bid' };
+    }
+
+    this.auction.skipped.add(playerId);
+    this.touch();
+    this._emit();
+
+    if (this._allBiddersDecided()) {
+      this._clearTimer();
+      this._finalizeAuction();
+    }
     return { ok: true };
   }
 
@@ -510,6 +578,7 @@ class Room {
         highestBid: this.auction.highestBid,
         highestBidderId: this.auction.highestBidderId,
         bidLog: this.auction.bidLog.slice(-10),
+        skipped: this.auction.skipped ? Array.from(this.auction.skipped) : [],
         endsAt: this.auction.endsAt,
         lastResult: this.auction.lastResult || null,
         // Everyone can browse the remaining pool while a nomination is being made,

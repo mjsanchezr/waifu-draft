@@ -11,16 +11,34 @@ ronda por ronda se enfrentan las primeras waifus de cada jugador entre sí,
 luego las segundas, etc. La que más votos reciba en cada ronda suma un punto
 para su dueño. Gana quien más rondas se lleve.
 
-Incluye 53 personajes de 30 animes distintos (Re:Zero, SxF, AoT, Bleach,
-Fairy Tail, One Piece, Jujutsu Kaisen, Frieren, Chainsaw Man, y más), cada
-uno con su imagen oficial.
+Incluye 92 personajes de 55 animes distintos (Re:Zero, SxF, AoT, Bleach,
+Fairy Tail, One Piece, Jujutsu Kaisen, Frieren, Chainsaw Man, Fate/stay
+night, Code Geass, KonoSuba, Overlord, y muchos más), cada uno con su
+imagen oficial.
 
 **Imágenes**: los retratos se enlazan directamente desde el CDN público de
 [AniList](https://anilist.co) (`s4.anilist.co`), que expone su API
 justamente para que apps de terceros muestren estas imágenes — no se
 redistribuyen copias en este repo. Si AniList cambiara o retirase alguna
 URL, el personaje afectado simplemente se quedaría sin miniatura; el resto
-del juego sigue funcionando igual.
+del juego sigue funcionando igual. Nota honesta sobre la calidad: 230×345px
+es el tamaño más grande que AniList ofrece para retratos de personaje (lo
+confirmamos contra su API) — no existe una versión más "HD" que se pueda
+pedir de ahí. Compensamos con mejor presentación (marcos, sombras, tamaños
+de tarjeta ajustados) en vez de píxeles que la fuente no tiene.
+
+**Personalización antes de empezar** (solo el host, desde la sala de
+espera):
+- **Modo de juego**: "Elegir personaje" (el nominador escoge de la lista)
+  o "Aleatorio" (el personaje de cada turno se sortea al instante).
+- **Prohibir autovoto**: activado por defecto — nadie puede votar por su
+  propia waifu en la ronda de votación.
+
+**Durante la subasta**, cualquiera puede pulsar "Saltar" para decir que no
+le interesa la waifu en juego; en cuanto pujas, ya no puedes saltar. Si
+todos los que faltaban por decidir saltan, la ronda se resuelve al
+instante (sin ganador si nadie pujó, o para quien iba ganando si alguien
+sí lo hizo) en vez de esperar el reloj completo.
 
 ## Cómo jugar
 

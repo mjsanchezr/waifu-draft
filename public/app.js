@@ -7,6 +7,48 @@ let myRoomCode = localStorage.getItem('wd_roomCode') || null;
 let latestState = null;
 let me = null;
 
+// ---------- decorative menu backdrop ----------
+
+const SHOWCASE_IMAGES = [
+  'https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png', // Rem
+  'https://s4.anilist.co/file/anilistcdn/character/large/b127518-NRlq1CQ1v1ro.png', // Nezuko
+  'https://s4.anilist.co/file/anilistcdn/character/large/b124381-2gAVq76HPfL2.png', // Zero Two
+  'https://s4.anilist.co/file/anilistcdn/character/large/b40881-F3gr1PkreDvj.png', // Mikasa
+  'https://s4.anilist.co/file/anilistcdn/character/large/b36828-j5ib0adAzGMx.png', // Asuna
+  'https://s4.anilist.co/file/anilistcdn/character/large/b133676-kV2czE3C8Qls.png', // Marin
+  'https://s4.anilist.co/file/anilistcdn/character/large/b138102-ZOAu9jI2d5ke.png', // Yor
+  'https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png', // Makima
+  'https://s4.anilist.co/file/anilistcdn/character/large/b176754-PCnpqIOkjhFk.png', // Frieren
+  'https://s4.anilist.co/file/anilistcdn/character/large/b70069-DEV7X6o2L7oG.jpg', // Kurumi
+  'https://s4.anilist.co/file/anilistcdn/character/large/b50389-gIhJkyk8xj1P.png', // Rias
+  'https://s4.anilist.co/file/anilistcdn/character/large/b90169-4wr1Zehnsac8.png', // Violet
+  'https://s4.anilist.co/file/anilistcdn/character/large/b127222-Jh5hhP7vZ7s1.png', // Mai
+  'https://s4.anilist.co/file/anilistcdn/character/large/b172759-cccVhJ2fQA92.png', // Ai Hoshino
+  'https://s4.anilist.co/file/anilistcdn/character/large/b5189-GR1xdok9SFsN.jpg', // Erza
+  'https://s4.anilist.co/file/anilistcdn/character/large/b16342-kVOF6V5Q94go.png', // Boa Hancock
+  'https://s4.anilist.co/file/anilistcdn/character/large/b497-Yg5pNmC8kxzs.png', // Saber
+  'https://s4.anilist.co/file/anilistcdn/character/large/b89361-tq8PQQ4MmF0M.png', // Megumin
+];
+
+function renderBackdrop(elId) {
+  const el = document.getElementById(elId);
+  if (!el || el.childElementCount > 0) return;
+  // Shuffle a copy so home/lobby don't show the exact same tile order, then
+  // tile it out to enough cells to cover tall/wide viewports (the grid's
+  // implicit row count depends on how many items it's given).
+  const shuffled = [...SHOWCASE_IMAGES].sort(() => Math.random() - 0.5);
+  const TILE_COUNT = 64;
+  const tiles = Array.from({ length: TILE_COUNT }, (_, i) => shuffled[i % shuffled.length]);
+  el.innerHTML = tiles
+    .map(
+      (src, i) =>
+        `<img src="${src}" alt="" loading="lazy" style="animation-delay:${(i % 8) * 90}ms" onerror="this.style.display='none'" />`
+    )
+    .join('');
+}
+renderBackdrop('home-backdrop');
+renderBackdrop('lobby-backdrop');
+
 // ---------- helpers ----------
 
 function escapeHtml(str) {
@@ -51,6 +93,7 @@ const ERROR_MESSAGES = {
   invalid_candidate: 'Voto inválido.',
   not_finished: 'La partida todavía no ha terminado.',
   invalid_mode: 'Modo de juego inválido.',
+  already_bid: 'Ya has pujado por esta waifu — no puedes saltarla ahora.',
   already_voted: 'Ya has votado en esta ronda — tu voto es definitivo.',
   self_vote_not_allowed: 'No puedes votar por tu propia waifu en esta partida.',
 };
@@ -295,6 +338,18 @@ document.getElementById('btn-start').addEventListener('click', () => {
   });
 });
 
+document.getElementById('btn-leave-room').addEventListener('click', () => {
+  socket.emit('leaveRoom', {}, (res) => {
+    if (!res.ok) return toast(errorMessage(res.error), true);
+    localStorage.removeItem('wd_playerId');
+    localStorage.removeItem('wd_roomCode');
+    myPlayerId = null;
+    myRoomCode = null;
+    latestState = null;
+    showScreen('home');
+  });
+});
+
 // ---------- auction ----------
 
 let poolSearch = '';
@@ -360,6 +415,8 @@ function renderAuction(state) {
       .reverse()
       .map((b) => `<div>${escapeHtml(playerName(state, b.playerId))} pujó $${b.amount}</div>`)
       .join('');
+
+    renderSkipButton(state, a);
   } else if (a.stage === 'result') {
     resPanel.classList.remove('hidden');
     armTimer('auction-timer-bar', null);
@@ -369,6 +426,40 @@ function renderAuction(state) {
       : `Nadie pujó por ${r.character.name}. Vuelve a la reserva.`;
   }
 }
+
+function renderSkipButton(state, a) {
+  const btn = document.getElementById('btn-skip');
+  const status = document.getElementById('skip-status');
+  const skipped = a.skipped || [];
+
+  if (!me || !me.connected || me.roster.length >= 5) {
+    btn.classList.add('hidden');
+    status.textContent = '';
+    return;
+  }
+
+  const hasBid = a.bidLog.some((b) => b.playerId === myPlayerId);
+  if (hasBid) {
+    btn.classList.add('hidden');
+  } else {
+    btn.classList.remove('hidden');
+    const hasSkipped = skipped.includes(myPlayerId);
+    btn.classList.toggle('skipped', hasSkipped);
+    btn.disabled = hasSkipped;
+    document.getElementById('btn-skip-label').textContent = hasSkipped ? 'Ya has saltado' : 'Saltar';
+  }
+
+  const skippedNames = skipped.filter((pid) => pid !== myPlayerId).map((pid) => playerName(state, pid));
+  status.textContent = skippedNames.length
+    ? `${skippedNames.length === 1 ? 'Ha' : 'Han'} saltado: ${skippedNames.join(', ')}`
+    : '';
+}
+
+document.getElementById('btn-skip').addEventListener('click', () => {
+  socket.emit('skipBid', {}, (res) => {
+    if (!res.ok) toast(errorMessage(res.error), true);
+  });
+});
 
 function renderPool(state, clickable) {
   const container = document.getElementById('pool-list');

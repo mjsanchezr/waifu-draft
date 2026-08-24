@@ -12,6 +12,7 @@
 
   <!-- SCREEN: HOME -->
   <section id="screen-home" class="screen active">
+    <div class="menu-backdrop" id="home-backdrop" aria-hidden="true"></div>
     <div class="home-card">
       <h1 class="brand">
         <svg class="icon" viewBox="0 0 32 32" aria-hidden="true">
@@ -56,7 +57,14 @@
 
   <!-- SCREEN: LOBBY -->
   <section id="screen-lobby" class="screen">
+    <div class="menu-backdrop" id="lobby-backdrop" aria-hidden="true"></div>
     <div class="topbar">
+      <button id="btn-leave-room" class="btn tiny back-btn" title="Salir de la sala">
+        <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 18l-6-6 6-6" />
+        </svg>
+        Salir
+      </button>
       <div class="room-code">
         Sala <span id="lobby-code">----</span>
         <button id="btn-copy-code" class="btn tiny" title="Copiar código">
@@ -142,6 +150,14 @@
             <button class="btn primary" id="btn-bid-custom">Pujar</button>
           </div>
         </div>
+        <button id="btn-skip" class="btn skip-btn">
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 4v16l12-8L5 4Z" />
+            <path d="M19 5v14" />
+          </svg>
+          <span id="btn-skip-label">Saltar</span>
+        </button>
+        <p id="skip-status" class="hint"></p>
         <p id="bid-help" class="hint"></p>
         <div id="bid-log" class="bid-log"></div>
       </div>
