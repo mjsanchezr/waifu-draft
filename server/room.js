@@ -4,7 +4,9 @@ const crypto = require('crypto');
 const { freshPool } = require('./characters');
 
 const STARTING_BUDGET = 100;
-const ROSTER_SIZE = 5;
+const DEFAULT_ROSTER_SIZE = 5;
+const MIN_ROSTER_SIZE = 3;
+const MAX_ROSTER_SIZE = 10;
 const MIN_BID_INCREMENT = 1;
 const NOMINATION_SECONDS = 30;
 const BIDDING_SECONDS = 15;
@@ -33,8 +35,10 @@ class Room {
     this.auction = null;
     this.voting = null;
     this.settings = {
-      mode: 'choice', // choice (nominator picks) | random (auto-picked each round)
+      mode: 'choice', // choice (nominator picks) | random (auto-picked) | blind (auto-picked + hidden until won)
       noSelfVote: true, // players can't vote for their own submitted waifu
+      rosterSize: DEFAULT_ROSTER_SIZE, // waifus each player collects before voting starts
+      includeTroll: false, // mix in joke/mascot characters (Chopper, Ryuk, etc.)
     };
     this.createdAt = Date.now();
     this.lastActivity = Date.now();
@@ -156,13 +160,23 @@ class Room {
 
     const next = { ...this.settings };
     if (patch && Object.prototype.hasOwnProperty.call(patch, 'mode')) {
-      if (patch.mode !== 'choice' && patch.mode !== 'random') {
+      if (!['choice', 'random', 'blind'].includes(patch.mode)) {
         return { ok: false, error: 'invalid_mode' };
       }
       next.mode = patch.mode;
     }
     if (patch && Object.prototype.hasOwnProperty.call(patch, 'noSelfVote')) {
       next.noSelfVote = !!patch.noSelfVote;
+    }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'includeTroll')) {
+      next.includeTroll = !!patch.includeTroll;
+    }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'rosterSize')) {
+      const size = Math.floor(Number(patch.rosterSize));
+      if (!Number.isFinite(size) || size < MIN_ROSTER_SIZE || size > MAX_ROSTER_SIZE) {
+        return { ok: false, error: 'invalid_roster_size' };
+      }
+      next.rosterSize = size;
     }
     this.settings = next;
     this.touch();
@@ -175,7 +189,7 @@ class Room {
   startAuction() {
     if (!this.canStart()) return false;
     this.phase = 'auction';
-    this.pool = freshPool();
+    this.pool = freshPool({ includeTroll: this.settings.includeTroll });
     this.auction = {
       nominatorIndex: 0,
       stage: 'nominating', // nominating | bidding | result
@@ -192,12 +206,14 @@ class Room {
   }
 
   /** Opens the current nominator's turn: waits for a manual pick in "choice"
-   * mode, or auto-resolves instantly in "random" mode. */
+   * mode, or auto-resolves instantly in "random"/"blind" mode (in blind
+   * mode nobody — not even the nominator — can see character names, so
+   * there's nothing meaningful to manually pick from). */
   _beginNomination() {
     this.auction.stage = 'nominating';
     this.auction.character = null;
     this.auction.lastResult = null;
-    if (this.settings.mode === 'random') {
+    if (this.settings.mode === 'random' || this.settings.mode === 'blind') {
       this.auction.endsAt = null;
       this._autoNominate(); // resolves synchronously and emits its own state
     } else {
@@ -208,7 +224,7 @@ class Room {
   }
 
   _slotsRemaining(player) {
-    return ROSTER_SIZE - player.roster.length;
+    return this.settings.rosterSize - player.roster.length;
   }
 
   _eligibleNominators() {
@@ -392,7 +408,7 @@ class Room {
 
   _checkAuctionComplete() {
     const active = this.connectedPlayers();
-    const allFull = active.length > 0 && active.every((p) => p.roster.length >= ROSTER_SIZE);
+    const allFull = active.length > 0 && active.every((p) => p.roster.length >= this.settings.rosterSize);
     const noOneEligible = this._eligibleNominators().length === 0;
     if (allFull || noOneEligible) {
       this._clearTimer();
@@ -408,7 +424,7 @@ class Room {
     this.phase = 'voting';
     this.voting = {
       round: 1,
-      totalRounds: ROSTER_SIZE,
+      totalRounds: this.settings.rosterSize,
       votes: {}, // voterId -> candidatePlayerId
       history: [], // { round, tally: {playerId: count}, winners: [playerId] }
       scores: {}, // playerId -> total round wins
@@ -571,10 +587,16 @@ class Room {
 
     if (this.phase === 'auction' && this.auction) {
       const nominator = this.currentNominator();
+      const isBlind = this.settings.mode === 'blind';
+      const rawCharacter = this.auction.character;
+      const character =
+        rawCharacter && isBlind && this.auction.stage === 'bidding'
+          ? { anime: rawCharacter.anime, color: rawCharacter.color, hidden: true }
+          : rawCharacter;
       base.auction = {
         stage: this.auction.stage,
         nominatorId: nominator ? nominator.id : null,
-        character: this.auction.character,
+        character,
         highestBid: this.auction.highestBid,
         highestBidderId: this.auction.highestBidderId,
         bidLog: this.auction.bidLog.slice(-10),
@@ -607,4 +629,4 @@ class Room {
   }
 }
 
-module.exports = { Room, STARTING_BUDGET, ROSTER_SIZE };
+module.exports = { Room, STARTING_BUDGET, DEFAULT_ROSTER_SIZE, MIN_ROSTER_SIZE, MAX_ROSTER_SIZE };

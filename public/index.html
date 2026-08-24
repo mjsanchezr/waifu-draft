@@ -83,7 +83,7 @@
       <div class="settings-panel">
         <h3>Configuración de la partida</h3>
 
-        <div class="setting-row">
+        <div class="setting-row setting-row-stack">
           <div class="setting-label">
             <span>Modo de juego</span>
             <span class="hint">Cómo se elige qué personaje sale a subasta en cada turno.</span>
@@ -91,6 +91,19 @@
           <div class="segmented" id="mode-segmented">
             <button type="button" class="segmented-option" data-mode="choice">Elegir personaje</button>
             <button type="button" class="segmented-option" data-mode="random">Aleatorio</button>
+            <button type="button" class="segmented-option" data-mode="blind">A ciegas</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Waifus por jugador</span>
+            <span class="hint">Cuántos personajes gana cada jugador antes de pasar a la votación.</span>
+          </div>
+          <div class="stepper" id="roster-size-stepper">
+            <button type="button" class="btn tiny stepper-btn" id="roster-size-minus" aria-label="Menos">−</button>
+            <span class="stepper-value" id="roster-size-value">5</span>
+            <button type="button" class="btn tiny stepper-btn" id="roster-size-plus" aria-label="Más">+</button>
           </div>
         </div>
 
@@ -101,6 +114,17 @@
           </div>
           <label class="switch">
             <input type="checkbox" id="setting-no-self-vote" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Incluir personajes troll</span>
+            <span class="hint">Mezcla en la subasta fichajes de broma (Chopper, Speedwagon, Ryuk…).</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-include-troll" />
             <span class="switch-track"><span class="switch-thumb"></span></span>
           </label>
         </div>
@@ -131,8 +155,15 @@
       <div id="auction-bidding" class="panel hidden">
         <div class="char-card" id="char-card">
           <img class="char-portrait" id="char-portrait" src="" alt="" onerror="this.style.visibility='hidden'" onload="this.style.visibility='visible'" />
+          <div class="char-portrait mystery-portrait hidden" id="char-mystery">
+            <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <circle cx="12" cy="17" r="0.5" fill="currentColor" />
+            </svg>
+          </div>
           <div class="char-anime" id="char-anime"></div>
           <div class="char-name" id="char-name"></div>
+          <span class="troll-badge hidden" id="char-troll-badge">TROLL</span>
         </div>
         <div class="bid-status">
           <div class="bid-current">

@@ -162,6 +162,36 @@ const CHARACTER_IMAGES = {
   'Yui Hirasawa': 'https://s4.anilist.co/file/anilistcdn/character/large/b19565-7gMiEAm7NGNK.png',
 };
 
+/**
+ * Optional joke/mascot picks — comic-relief characters that aren't "waifus"
+ * at all. Off by default; a host can opt in from the settings panel to mix
+ * them into the auction pool as a surprise.
+ */
+const TROLL_RAW_DATA = [
+  ['One Piece', ['Tony Tony Chopper']],
+  ['Fairy Tail', ['Happy', 'Plue']],
+  ['Bleach', ['Kon']],
+  ['Dragon Ball', ['Master Roshi']],
+  ['One Punch Man', ['Saitama']],
+  ['Naruto', ['Might Guy']],
+  ["JoJo's Bizarre Adventure", ['Robert E. O. Speedwagon']],
+  ['Death Note', ['Ryuk']],
+  ['Assassination Classroom', ['Korosensei']],
+];
+
+const TROLL_CHARACTER_IMAGES = {
+  'Happy': 'https://s4.anilist.co/file/anilistcdn/character/large/b5188-1jTaic3aJ7Ds.jpg',
+  'Kon': 'https://s4.anilist.co/file/anilistcdn/character/large/1089.jpg',
+  'Korosensei': 'https://s4.anilist.co/file/anilistcdn/character/large/b65643-jimrOw0RGtoB.png',
+  'Master Roshi': 'https://s4.anilist.co/file/anilistcdn/character/large/b6167-aMPt1bHf5YbV.jpg',
+  'Might Guy': 'https://s4.anilist.co/file/anilistcdn/character/large/b307-xieUEdhdTVwQ.png',
+  'Plue': 'https://s4.anilist.co/file/anilistcdn/character/large/5879.jpg',
+  'Robert E. O. Speedwagon': 'https://s4.anilist.co/file/anilistcdn/character/large/n21938-7iTMOJ4i6ET8.png',
+  'Ryuk': 'https://s4.anilist.co/file/anilistcdn/character/large/b75-IkEpzO21LgFy.jpg',
+  'Saitama': 'https://s4.anilist.co/file/anilistcdn/character/large/b73935-ON5d0mAcrItd.jpg',
+  'Tony Tony Chopper': 'https://s4.anilist.co/file/anilistcdn/character/large/b309-H64NhbJ2ywIQ.jpg',
+};
+
 function slugify(str) {
   return str
     .toLowerCase()
@@ -196,14 +226,33 @@ for (const [anime, names] of RAW_DATA) {
   }
 }
 
-function freshPool() {
-  // Return a shuffled deep copy so each room gets its own independent order.
-  const pool = CHARACTERS.map((c) => ({ ...c }));
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+const TROLL_CHARACTERS = [];
+for (const [anime, names] of TROLL_RAW_DATA) {
+  const animeColor = colorFor(anime);
+  for (const name of names) {
+    TROLL_CHARACTERS.push({
+      id: `${slugify(anime)}__${slugify(name)}`,
+      name,
+      anime,
+      color: animeColor,
+      image: TROLL_CHARACTER_IMAGES[name] || null,
+      isTroll: true,
+    });
   }
-  return pool;
 }
 
-module.exports = { CHARACTERS, freshPool };
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function freshPool({ includeTroll = false } = {}) {
+  // Return a shuffled deep copy so each room gets its own independent order.
+  const source = includeTroll ? [...CHARACTERS, ...TROLL_CHARACTERS] : CHARACTERS;
+  return shuffle(source.map((c) => ({ ...c })));
+}
+
+module.exports = { CHARACTERS, TROLL_CHARACTERS, freshPool };

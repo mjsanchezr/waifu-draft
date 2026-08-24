@@ -205,6 +205,16 @@ label {
 }
 .slot-dot.filled { border-color: var(--accent-2); }
 .host-badge { font-size: 0.7rem; background: var(--accent); color: #1a0f2c; border-radius: 6px; padding: 1px 5px; }
+.troll-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: var(--warn);
+  color: #241a05;
+  border-radius: 6px;
+  padding: 1px 5px;
+  display: inline-block;
+}
 
 .status-dot {
   display: inline-block;
@@ -259,6 +269,8 @@ label {
   border-top: 1px solid var(--border);
 }
 .setting-row:first-of-type { border-top: none; padding-top: 0; }
+.setting-row-stack { flex-direction: column; align-items: flex-start; gap: 10px; }
+.setting-row-stack .segmented { align-self: stretch; justify-content: space-between; }
 .setting-label { display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; }
 .setting-label .hint { font-size: 0.76rem; }
 
@@ -312,6 +324,31 @@ label {
 .switch input:checked + .switch-track { background: linear-gradient(135deg, var(--accent-2), var(--accent)); border-color: transparent; }
 .switch input:checked + .switch-track .switch-thumb { transform: translateX(18px); background: #fff; }
 .switch input:disabled + .switch-track { opacity: 0.5; cursor: not-allowed; }
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.stepper-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper-value {
+  min-width: 1.4em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
 .player-list li {
   display: flex;
   justify-content: space-between;
@@ -400,6 +437,14 @@ label {
   box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
   margin-bottom: 12px;
   background: rgba(0, 0, 0, 0.15);
+}
+.mystery-portrait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px dashed rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.85);
 }
 .char-anime { font-size: 0.9rem; opacity: 0.85; }
 .char-name { font-size: 1.8rem; font-weight: 800; margin-top: 4px; }

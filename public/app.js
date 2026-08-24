@@ -101,8 +101,8 @@ function errorMessage(code) {
   return ERROR_MESSAGES[code] || 'Algo salió mal.';
 }
 
-function maxAffordableBid(player) {
-  const slotsAfterThis = (5 - player.roster.length) - 1;
+function maxAffordableBid(player, rosterSize) {
+  const slotsAfterThis = (rosterSize - player.roster.length) - 1;
   const reserve = Math.max(0, slotsAfterThis) * 1;
   return Math.max(0, player.budget - reserve);
 }
@@ -245,7 +245,7 @@ function renderPlayersTopbar(elId, state, opts = {}) {
       const score = (state.voting && state.voting.scores[p.id]) || 0;
       extra = `<div class="pc-budget">${score} pt${score === 1 ? '' : 's'}</div>`;
     } else {
-      const slots = Array.from({ length: 5 }, (_, i) => {
+      const slots = Array.from({ length: state.settings.rosterSize }, (_, i) => {
         const owned = p.roster[i];
         const style = owned ? ` style="background-image:url('${owned.image || ''}')"` : '';
         return `<span class="slot-dot ${owned ? 'filled' : ''}"${style} title="${owned ? escapeHtml(owned.name) : ''}"></span>`;
@@ -291,17 +291,28 @@ function renderLobby(state) {
   renderSettingsPanel(state, isHost);
 }
 
+const ROSTER_SIZE_MIN = 3;
+const ROSTER_SIZE_MAX = 10;
+
 function renderSettingsPanel(state, isHost) {
-  const settings = state.settings || { mode: 'choice', noSelfVote: true };
+  const settings = state.settings || { mode: 'choice', noSelfVote: true, rosterSize: 5, includeTroll: false };
 
   document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.mode === settings.mode);
     btn.disabled = !isHost;
   });
 
+  document.getElementById('roster-size-value').textContent = settings.rosterSize;
+  document.getElementById('roster-size-minus').disabled = !isHost || settings.rosterSize <= ROSTER_SIZE_MIN;
+  document.getElementById('roster-size-plus').disabled = !isHost || settings.rosterSize >= ROSTER_SIZE_MAX;
+
   const selfVoteCheckbox = document.getElementById('setting-no-self-vote');
   selfVoteCheckbox.checked = settings.noSelfVote;
   selfVoteCheckbox.disabled = !isHost;
+
+  const trollCheckbox = document.getElementById('setting-include-troll');
+  trollCheckbox.checked = settings.includeTroll;
+  trollCheckbox.disabled = !isHost;
 
   document.getElementById('settings-readonly-hint').classList.toggle('hidden', isHost);
 }
@@ -323,6 +334,26 @@ document.getElementById('setting-no-self-vote').addEventListener('change', (e) =
     }
   });
 });
+
+document.getElementById('setting-include-troll').addEventListener('change', (e) => {
+  socket.emit('updateSettings', { includeTroll: e.target.checked }, (res) => {
+    if (!res.ok) {
+      toast(errorMessage(res.error), true);
+      e.target.checked = !e.target.checked;
+    }
+  });
+});
+
+function nudgeRosterSize(delta) {
+  if (!latestState || !latestState.settings) return;
+  const next = latestState.settings.rosterSize + delta;
+  if (next < ROSTER_SIZE_MIN || next > ROSTER_SIZE_MAX) return;
+  socket.emit('updateSettings', { rosterSize: next }, (res) => {
+    if (!res.ok) toast(errorMessage(res.error), true);
+  });
+}
+document.getElementById('roster-size-minus').addEventListener('click', () => nudgeRosterSize(-1));
+document.getElementById('roster-size-plus').addEventListener('click', () => nudgeRosterSize(1));
 
 document.getElementById('btn-copy-code').addEventListener('click', () => {
   if (!latestState) return;
@@ -386,26 +417,40 @@ function renderAuction(state) {
     bidPanel.classList.remove('hidden');
     armTimer('auction-timer-bar', a.endsAt);
 
-    document.getElementById('char-portrait').src = a.character.image || '';
-    document.getElementById('char-portrait').alt = a.character.name;
+    const portraitImg = document.getElementById('char-portrait');
+    const mysteryBox = document.getElementById('char-mystery');
+    const trollBadge = document.getElementById('char-troll-badge');
+    if (a.character.hidden) {
+      portraitImg.classList.add('hidden');
+      mysteryBox.classList.remove('hidden');
+      trollBadge.classList.add('hidden');
+      document.getElementById('char-name').textContent = '??? (personaje misterioso)';
+    } else {
+      portraitImg.classList.remove('hidden');
+      mysteryBox.classList.add('hidden');
+      portraitImg.src = a.character.image || '';
+      portraitImg.alt = a.character.name;
+      document.getElementById('char-name').textContent = a.character.name;
+      trollBadge.classList.toggle('hidden', !a.character.isTroll);
+    }
     document.getElementById('char-anime').textContent = a.character.anime;
-    document.getElementById('char-name').textContent = a.character.name;
     document.getElementById('bid-amount').textContent = `$${a.highestBid}`;
     document.getElementById('bid-leader').textContent = a.highestBidderId
       ? `${playerName(state, a.highestBidderId)} va ganando`
       : 'Sin pujas todavía — mínimo $1';
 
+    const rosterSize = state.settings.rosterSize;
     const controls = document.getElementById('bid-controls');
     const help = document.getElementById('bid-help');
-    if (me && me.roster.length < 5 && me.connected) {
+    if (me && me.roster.length < rosterSize && me.connected) {
       controls.classList.remove('hidden');
-      const max = maxAffordableBid(me);
+      const max = maxAffordableBid(me, rosterSize);
       help.textContent = `Tu presupuesto: $${me.budget} · Máximo que puedes pujar ahora: $${max}`;
       document.getElementById('bid-input').max = String(max);
     } else {
       controls.classList.add('hidden');
-      help.textContent = me && me.roster.length >= 5
-        ? 'Ya completaste tu equipo de 5. ¡Disfruta viendo la subasta!'
+      help.textContent = me && me.roster.length >= rosterSize
+        ? `Ya completaste tu equipo de ${rosterSize}. ¡Disfruta viendo la subasta!`
         : '';
     }
 
@@ -432,7 +477,7 @@ function renderSkipButton(state, a) {
   const status = document.getElementById('skip-status');
   const skipped = a.skipped || [];
 
-  if (!me || !me.connected || me.roster.length >= 5) {
+  if (!me || !me.connected || me.roster.length >= state.settings.rosterSize) {
     btn.classList.add('hidden');
     status.textContent = '';
     return;
@@ -476,7 +521,7 @@ function renderPool(state, clickable) {
     item.innerHTML = `
       <img class="pi-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />
       <div>
-        <div class="pi-name">${escapeHtml(c.name)}</div>
+        <div class="pi-name">${escapeHtml(c.name)} ${c.isTroll ? '<span class="troll-badge">TROLL</span>' : ''}</div>
         <div class="pi-anime">${escapeHtml(c.anime)}</div>
       </div>
     `;
@@ -508,8 +553,8 @@ document.querySelectorAll('[data-bid-delta]').forEach((btn) => {
   });
 });
 document.getElementById('btn-bid-max').addEventListener('click', () => {
-  if (!me) return;
-  submitBid(maxAffordableBid(me));
+  if (!me || !latestState) return;
+  submitBid(maxAffordableBid(me, latestState.settings.rosterSize));
 });
 document.getElementById('btn-bid-custom').addEventListener('click', () => {
   const val = document.getElementById('bid-input').value;
@@ -557,7 +602,7 @@ function renderVoting(state) {
     card.innerHTML = `
       <img class="c-portrait" src="${m.character.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />
       <div class="c-anime">${escapeHtml(m.character.anime)}</div>
-      <div class="c-name">${escapeHtml(m.character.name)}</div>
+      <div class="c-name">${escapeHtml(m.character.name)} ${m.character.isTroll ? '<span class="troll-badge">TROLL</span>' : ''}</div>
       <div class="c-owner">de ${escapeHtml(playerName(state, m.playerId))}${isOwn ? ' (tú)' : ''}</div>
       ${noSelfVote && isOwn ? '<div class="c-blocked-tag">No puedes votar tu propia waifu</div>' : ''}
       <div class="c-bar"><div class="c-bar-fill" style="width:${pct}%"></div></div>
@@ -602,7 +647,7 @@ function renderResults(state) {
       const items = s.roster
         .map(
           (c) => `<div class="rb-item">
-            <span class="rb-left"><img class="rb-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /> ${escapeHtml(c.name)} (${escapeHtml(c.anime)})</span>
+            <span class="rb-left"><img class="rb-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /> ${escapeHtml(c.name)} (${escapeHtml(c.anime)}) ${c.isTroll ? '<span class="troll-badge">TROLL</span>' : ''}</span>
             <span>$${c.price}</span>
           </div>`
         )
