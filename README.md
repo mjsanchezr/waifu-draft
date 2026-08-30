@@ -33,7 +33,7 @@ de tarjeta ajustados) en vez de píxeles que la fuente no tiene.
 espera, o el interruptor "Waifus / Chicos" en la propia pantalla de
 inicio):
 - **Personajes**: "Waifus" (el catálogo de anime de siempre) o "Chicos" —
-  60 actores y personajes reales/ficticios (Tom Holland, Chris Hemsworth,
+  63 actores y personajes reales/ficticios (Tom Holland, Chris Hemsworth,
   Leonardo DiCaprio, Jacob Elordi, personajes de Gossip Girl, Outer Banks,
   Big Time Rush, futbolistas, etc.), pensado para que quien prefiera
   subastar chicos en vez de waifus también tenga su versión del juego.
@@ -60,9 +60,25 @@ redistribuyen copias en este repo, igual que con AniList. Para personajes
 de ficción usamos la foto del actor que los interpreta, ya que los
 artículos de los personajes casi nunca tienen una imagen libre propia.
 Cada nombre de la lista original se verificó a mano (búsqueda + revisión
-visual) antes de incluirlo; 8 de los ~70 nombres pedidos se quedaron fuera
-porque no encontramos una foto libre que identificara con confianza a esa
-persona en concreto.
+visual) antes de incluirlo; **63 de los ~70 nombres pedidos** están
+incluidos. Los 5 que se quedaron fuera (Ben Florian, Nuno Gallego, Héctor
+Fort, Ronen Rubinstein, Corey Mylchreest) no tienen ninguna foto con
+licencia libre localizable — ni en su artículo de Wikipedia ni en
+Wikimedia Commons — así que no hay ninguna imagen legítima que se les
+pueda asignar por ahora sin arriesgarse a mostrar a la persona
+equivocada.
+
+Nota sobre "que se vean jóvenes": Wikimedia Commons solo aloja fotos con
+licencia libre, y la fotografía de famosos con licencia libre (Flickr CC,
+fotógrafos de convenciones, etc.) se volvió común recién a mediados de
+los 2000. Para estrellas cuya etapa "20-30 años" fue en los 80-90
+(Leonardo DiCaprio, Brad Pitt, Tom Cruise, Robert Downey Jr.) no existe
+ninguna foto libre de esa época — la foto actual es la única opción libre
+real. Para quienes su papel más conocido aquí fue en los 2000s-2010s sí
+se consiguieron fotos de esa época (Chad Michael Murray y Paul Walker en
+2007, por ejemplo); para otros (Kevin Jonas, Tom Welling, Ryan Reynolds,
+Ian Somerhalder, Jensen Ackles, Robert Pattinson) se intentó pero no
+apareció ninguna foto libre genuinamente distinta a la actual.
 
 **Durante la subasta**, cualquiera puede pulsar "Saltar" para decir que no
 le interesa la waifu en juego; en cuanto pujas, ya no puedes saltar. Si

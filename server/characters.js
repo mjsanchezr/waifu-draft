@@ -287,23 +287,30 @@ const MEN_RAW_DATA = [
   ['Supernatural', ['Dean Winchester']],
   ['Stranger Things', ['Joe Keery']],
   ['Smallville', ['Tom Welling']],
-  ['Soy Luna', ['Ruggero Pasquarelli']],
+  ['Soy Luna', ['Ruggero Pasquarelli', 'Agustin Bernasconi']],
+  ["Bunk'd", ['Xander McCormick']],
+  ['Off Campus', ['Stephen Kalyn']],
 ];
 
 // Portraits sourced from Wikipedia's public MediaWiki API (free-licensed
 // images, meant for third-party reuse). For fictional characters this is
 // usually the actor's own photo, since character-specific articles rarely
 // carry a free image. A handful of names from the original request
-// (Ben Florian, Nuno Gallego, Xander McCormick, Hector Fort, Ronen
-// Rubinstein, Corey Mylchreest, Agustin Bernasconi, Stephen Kalyn) were
-// dropped: no confidently-matching free photo could be found for them.
+// (Ben Florian, Nuno Gallego, Hector Fort, Ronen Rubinstein, Corey
+// Mylchreest) were dropped: no confidently-matching free photo could be
+// found for them, even after a second research pass. Xander McCormick,
+// Agustin Bernasconi, and Stephen Kalyn were originally dropped too but
+// got resolved on that second pass once their real identities (Kevin
+// Quinn / Agustín Bernasconi himself / Stephen Kalyn himself) were
+// pinned down precisely enough to search for.
 const MEN_CHARACTER_IMAGES = {
+  'Agustin Bernasconi': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Agustin_Bernasconi.jpg',
   'Andrew Garfield': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg/500px-Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg',
   'Avan Jogia': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Avan_Jogia_%2833384365238%29_%28cropped%29.jpg/500px-Avan_Jogia_%2833384365238%29_%28cropped%29.jpg',
   'Barry Allen': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Grant_Gustin_%2855267599668%29.jpg/500px-Grant_Gustin_%2855267599668%29.jpg',
   'Brad Pitt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Brad_Pitt-69858.jpg/500px-Brad_Pitt-69858.jpg',
   'Carlos Garcia': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Carlos_Pena_Jr_BTR_Paparazzo.jpg/500px-Carlos_Pena_Jr_BTR_Paparazzo.jpg',
-  'Chad Michael Murray': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Chad_Michael_Murray_at_Nostalgia_Con_Anaheim_2026.jpg/500px-Chad_Michael_Murray_at_Nostalgia_Con_Anaheim_2026.jpg',
+  'Chad Michael Murray': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Chad_Michael_Murray_1.JPG/500px-Chad_Michael_Murray_1.JPG',
   'Channing Tatum': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg/500px-Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg',
   'Charles Gillespie': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/CharlieGillespie-byPhilipRomano.jpg/500px-CharlieGillespie-byPhilipRomano.jpg',
   'Chris Evans': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg/500px-Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg',
@@ -345,7 +352,7 @@ const MEN_CHARACTER_IMAGES = {
   'Noah Centineo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Noah_Centineo_by_Gage_Skidmore.jpg/500px-Noah_Centineo_by_Gage_Skidmore.jpg',
   'Oliver Queen': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Stephen_Amell_%2852773145678%29.jpg/500px-Stephen_Amell_%2852773145678%29.jpg',
   'Pablo Gavi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Gavi_Argentina_v_Spain_19_July_2026-013.jpg/500px-Gavi_Argentina_v_Spain_19_July_2026-013.jpg',
-  'Paul Walker': 'https://upload.wikimedia.org/wikipedia/commons/9/91/PaulWalkerEdit-1.jpg',
+  'Paul Walker': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Paul_Walker.jpg/500px-Paul_Walker.jpg',
   'Paulo Dybala': 'https://upload.wikimedia.org/wikipedia/commons/b/b3/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg',
   'Rafe Cameron': 'https://upload.wikimedia.org/wikipedia/commons/b/be/Drew_Starkey_at_81st_Venice_International_Film_Festival.jpg',
   'Robert Downey Jr': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg/500px-RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg',
@@ -357,7 +364,9 @@ const MEN_CHARACTER_IMAGES = {
   'Thomas Brodie-Sangster': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Thomas_Brodie-Sangster_by_Gage_Skidmore_2.jpg/500px-Thomas_Brodie-Sangster_by_Gage_Skidmore_2.jpg',
   'Tom Cruise': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg/500px-Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg',
   'Tom Holland': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/TomHolland-byPhilipRomano.jpg/500px-TomHolland-byPhilipRomano.jpg',
+  'Stephen Kalyn': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Stephen_kalyn.jpg/500px-Stephen_kalyn.jpg',
   'Tom Welling': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Tom_Welling_at_Galaxy_Con_Richmond.jpg/500px-Tom_Welling_at_Galaxy_Con_Richmond.jpg',
+  'Xander McCormick': 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Kevin_Gerard_Quinn.jpg',
 };
 
 function slugify(str) {
