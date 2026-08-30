@@ -27,7 +27,12 @@
         </svg>
         Waifu Draft
       </h1>
-      <p class="tagline">Subasta a tus waifus favoritas. Presupuesto: $100. Máximo 5 por jugador. 2-4 jugadores.</p>
+      <p class="tagline" id="home-tagline">Subasta a tus waifus favoritas. Presupuesto: $100. Máximo 5 por jugador. 2-4 jugadores.</p>
+
+      <div class="segmented" id="character-set-toggle">
+        <button type="button" class="segmented-option active" data-character-set="waifu">Waifus</button>
+        <button type="button" class="segmented-option" data-character-set="men">Chicos</button>
+      </div>
 
       <div class="tabs">
         <button class="tab active" data-tab="create">Crear sala</button>
@@ -85,6 +90,17 @@
 
         <div class="setting-row setting-row-stack">
           <div class="setting-label">
+            <span>Personajes</span>
+            <span class="hint">Waifus de anime o chicos reales/ficticios — cambia también el tema visual.</span>
+          </div>
+          <div class="segmented" id="character-set-segmented">
+            <button type="button" class="segmented-option" data-character-set="waifu">Waifus</button>
+            <button type="button" class="segmented-option" data-character-set="men">Chicos</button>
+          </div>
+        </div>
+
+        <div class="setting-row setting-row-stack">
+          <div class="setting-label">
             <span>Modo de juego</span>
             <span class="hint">Cómo se elige qué personaje sale a subasta en cada turno.</span>
           </div>
@@ -107,6 +123,24 @@
           </div>
         </div>
 
+        <div class="setting-row setting-row-stack">
+          <div class="setting-label">
+            <span>Presupuesto inicial</span>
+            <span class="hint">Dinero con el que empieza cada jugador (entre $20 y $500).</span>
+          </div>
+          <div class="budget-controls">
+            <button type="button" class="btn tiny chip" data-budget-delta="-100">−100</button>
+            <button type="button" class="btn tiny chip" data-budget-delta="-50">−50</button>
+            <div class="stepper" id="budget-stepper">
+              <button type="button" class="btn tiny stepper-btn" id="budget-minus" aria-label="Menos">−</button>
+              <span class="stepper-value" id="budget-value">$100</span>
+              <button type="button" class="btn tiny stepper-btn" id="budget-plus" aria-label="Más">+</button>
+            </div>
+            <button type="button" class="btn tiny chip" data-budget-delta="50">+50</button>
+            <button type="button" class="btn tiny chip" data-budget-delta="100">+100</button>
+          </div>
+        </div>
+
         <div class="setting-row">
           <div class="setting-label">
             <span>Prohibir autovoto</span>
@@ -118,7 +152,7 @@
           </label>
         </div>
 
-        <div class="setting-row">
+        <div class="setting-row" id="troll-setting-row">
           <div class="setting-label">
             <span>Incluir personajes troll</span>
             <span class="hint">Mezcla en la subasta fichajes de broma (Chopper, Speedwagon, Ryuk…).</span>

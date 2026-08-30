@@ -30,16 +30,41 @@ const SHOWCASE_IMAGES = [
   'https://s4.anilist.co/file/anilistcdn/character/large/b89361-tq8PQQ4MmF0M.png', // Megumin
 ];
 
+const MEN_SHOWCASE_IMAGES = [
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/TomHolland-byPhilipRomano.jpg/500px-TomHolland-byPhilipRomano.jpg', // Tom Holland
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg/500px-Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg', // Chris Evans
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Chris_Hemsworth_-_Crime_101.jpg/500px-Chris_Hemsworth_-_Crime_101.jpg', // Chris Hemsworth
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Sebastian_Stan-64526.jpg/500px-Sebastian_Stan-64526.jpg', // Sebastian Stan
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg/500px-RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg', // Robert Downey Jr
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/LeoPTABFI191125-28_%28cropped%29.jpg/500px-LeoPTABFI191125-28_%28cropped%29.jpg', // Leonardo DiCaprio
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Brad_Pitt-69858.jpg/500px-Brad_Pitt-69858.jpg', // Brad Pitt
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg/500px-Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg', // Tom Cruise
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg/500px-Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg', // Ryan Reynolds
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg/500px-Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg', // Channing Tatum
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/JacobElordi-TIFF2025-01_%28cropped_2%29.png/500px-JacobElordi-TIFF2025-01_%28cropped_2%29.png', // Jacob Elordi
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Noah_Centineo_by_Gage_Skidmore.jpg/500px-Noah_Centineo_by_Gage_Skidmore.jpg', // Noah Centineo
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Robert_Pattinson_at_Berlinale_2025.jpg/500px-Robert_Pattinson_at_Berlinale_2025.jpg', // Robert Pattinson
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg/500px-Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg', // Andrew Garfield
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Nick_Jonas_at_DIFF_2026.jpg/500px-Nick_Jonas_at_DIFF_2026.jpg', // Nick Jonas
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/P20260719DT-1213_President_Donald_J._Trump_and_First_Lady_Melania_Trump_attend_the_FIFA_World_Cup_Final_%28cropped_2%29.jpg/500px-P20260719DT-1213_President_Donald_J._Trump_and_First_Lady_Melania_Trump_attend_the_FIFA_World_Cup_Final_%28cropped_2%29.jpg', // Justin Bieber
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/2023-11-16_Gala_de_los_Latin_Grammy%2C_20_%28Maluma%29.jpg/500px-2023-11-16_Gala_de_los_Latin_Grammy%2C_20_%28Maluma%29.jpg', // Maluma
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Glen_Powell_by_Gage_Skidmore.jpg/500px-Glen_Powell_by_Gage_Skidmore.jpg', // Glenn Powell
+];
+
 const BACKDROP_CELL_W = 113; // 110px min column + 3px gap
 const BACKDROP_CELL_H = 133; // 130px row + 3px gap
 
-function renderBackdrop(elId) {
+function renderBackdrop(elId, flavor) {
+  flavor = flavor || 'waifu';
   const el = document.getElementById(elId);
+  if (!el) return;
   // Only (re)build once the element actually has layout — an inactive
   // screen (e.g. the lobby before you've joined a room) reports a 0x0 box,
   // so we'd otherwise under-fill it. Skip silently; whoever makes the
   // screen visible is responsible for calling this again.
-  if (!el || el.childElementCount > 0) return;
+  // Already showing this flavor? nothing to do. Showing the *other* one
+  // (character-set toggle flipped)? clear and rebuild.
+  if (el.dataset.flavor === flavor) return;
   const wrap = el.parentElement;
   const rect = wrap.getBoundingClientRect();
   if (rect.width < 10 || rect.height < 10) return;
@@ -54,9 +79,11 @@ function renderBackdrop(elId) {
   const rows = Math.ceil(gridHeight / BACKDROP_CELL_H) + 1;
   const tileCount = Math.max(24, cols * rows);
 
+  const source = flavor === 'men' ? MEN_SHOWCASE_IMAGES : SHOWCASE_IMAGES;
   // Shuffle a copy so home/lobby don't show the exact same tile order.
-  const shuffled = [...SHOWCASE_IMAGES].sort(() => Math.random() - 0.5);
+  const shuffled = [...source].sort(() => Math.random() - 0.5);
   const tiles = Array.from({ length: tileCount }, (_, i) => shuffled[i % shuffled.length]);
+  el.dataset.flavor = flavor;
   el.innerHTML = tiles
     .map(
       (src, i) =>
@@ -64,7 +91,27 @@ function renderBackdrop(elId) {
     )
     .join('');
 }
-renderBackdrop('home-backdrop');
+let homeCharacterSet = 'waifu';
+renderBackdrop('home-backdrop', homeCharacterSet);
+
+function applyTheme(characterSet) {
+  document.body.classList.toggle('theme-men', characterSet === 'men');
+}
+
+document.querySelectorAll('#character-set-toggle .segmented-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    homeCharacterSet = btn.dataset.characterSet;
+    document.querySelectorAll('#character-set-toggle .segmented-option').forEach((b) => {
+      b.classList.toggle('active', b === btn);
+    });
+    applyTheme(homeCharacterSet);
+    renderBackdrop('home-backdrop', homeCharacterSet);
+    document.getElementById('home-tagline').textContent =
+      homeCharacterSet === 'men'
+        ? 'Subasta a tus chicos favoritos. Presupuesto: $100. Máximo 5 por jugador. 2-4 jugadores.'
+        : 'Subasta a tus waifus favoritas. Presupuesto: $100. Máximo 5 por jugador. 2-4 jugadores.';
+  });
+});
 
 // ---------- helpers ----------
 
@@ -177,7 +224,7 @@ document.getElementById('form-create').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('create-name').value.trim();
   if (!name) return;
-  socket.emit('createRoom', { name }, (res) => {
+  socket.emit('createRoom', { name, characterSet: homeCharacterSet }, (res) => {
     if (!res.ok) return toast(errorMessage(res.error), true);
     myPlayerId = res.playerId;
     myRoomCode = res.roomCode;
@@ -225,6 +272,7 @@ socket.on('state', (state) => {
 // ---------- render dispatch ----------
 
 function render(state) {
+  applyTheme(state.settings.characterSet); // the room's actual setting always wins over a pre-join local guess
   switch (state.phase) {
     case 'lobby':
       showScreen('lobby');
@@ -281,7 +329,7 @@ function renderPlayersTopbar(elId, state, opts = {}) {
 // ---------- lobby ----------
 
 function renderLobby(state) {
-  renderBackdrop('lobby-backdrop'); // no-op after the first call; needs the screen to already be visible/laid out
+  renderBackdrop('lobby-backdrop', state.settings.characterSet); // needs the screen to already be visible/laid out
   document.getElementById('lobby-code').textContent = state.code;
 
   const list = document.getElementById('lobby-players');
@@ -311,9 +359,24 @@ function renderLobby(state) {
 
 const ROSTER_SIZE_MIN = 3;
 const ROSTER_SIZE_MAX = 10;
+const BUDGET_MIN = 20;
+const BUDGET_MAX = 500;
+const BUDGET_STEP = 10;
 
 function renderSettingsPanel(state, isHost) {
-  const settings = state.settings || { mode: 'choice', noSelfVote: true, rosterSize: 5, includeTroll: false };
+  const settings = state.settings || {
+    mode: 'choice',
+    noSelfVote: true,
+    rosterSize: 5,
+    includeTroll: false,
+    startingBudget: 100,
+    characterSet: 'waifu',
+  };
+
+  document.querySelectorAll('#character-set-segmented .segmented-option').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.characterSet === settings.characterSet);
+    btn.disabled = !isHost;
+  });
 
   document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.mode === settings.mode);
@@ -324,6 +387,11 @@ function renderSettingsPanel(state, isHost) {
   document.getElementById('roster-size-minus').disabled = !isHost || settings.rosterSize <= ROSTER_SIZE_MIN;
   document.getElementById('roster-size-plus').disabled = !isHost || settings.rosterSize >= ROSTER_SIZE_MAX;
 
+  document.getElementById('budget-value').textContent = `$${settings.startingBudget}`;
+  document.getElementById('budget-minus').disabled = !isHost || settings.startingBudget <= BUDGET_MIN;
+  document.getElementById('budget-plus').disabled = !isHost || settings.startingBudget >= BUDGET_MAX;
+  document.querySelectorAll('[data-budget-delta]').forEach((btn) => { btn.disabled = !isHost; });
+
   const selfVoteCheckbox = document.getElementById('setting-no-self-vote');
   selfVoteCheckbox.checked = settings.noSelfVote;
   selfVoteCheckbox.disabled = !isHost;
@@ -331,9 +399,19 @@ function renderSettingsPanel(state, isHost) {
   const trollCheckbox = document.getElementById('setting-include-troll');
   trollCheckbox.checked = settings.includeTroll;
   trollCheckbox.disabled = !isHost;
+  document.getElementById('troll-setting-row').classList.toggle('hidden', settings.characterSet !== 'waifu');
 
   document.getElementById('settings-readonly-hint').classList.toggle('hidden', isHost);
 }
+
+document.querySelectorAll('#character-set-segmented .segmented-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    socket.emit('updateSettings', { characterSet: btn.dataset.characterSet }, (res) => {
+      if (!res.ok) toast(errorMessage(res.error), true);
+    });
+  });
+});
 
 document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -373,6 +451,20 @@ function nudgeRosterSize(delta) {
 document.getElementById('roster-size-minus').addEventListener('click', () => nudgeRosterSize(-1));
 document.getElementById('roster-size-plus').addEventListener('click', () => nudgeRosterSize(1));
 
+function nudgeBudget(delta) {
+  if (!latestState || !latestState.settings) return;
+  const next = Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, latestState.settings.startingBudget + delta));
+  if (next === latestState.settings.startingBudget) return;
+  socket.emit('updateSettings', { startingBudget: next }, (res) => {
+    if (!res.ok) toast(errorMessage(res.error), true);
+  });
+}
+document.getElementById('budget-minus').addEventListener('click', () => nudgeBudget(-BUDGET_STEP));
+document.getElementById('budget-plus').addEventListener('click', () => nudgeBudget(BUDGET_STEP));
+document.querySelectorAll('[data-budget-delta]').forEach((btn) => {
+  btn.addEventListener('click', () => nudgeBudget(parseInt(btn.dataset.budgetDelta, 10)));
+});
+
 document.getElementById('btn-copy-code').addEventListener('click', () => {
   if (!latestState) return;
   navigator.clipboard?.writeText(latestState.code).then(
@@ -395,6 +487,7 @@ document.getElementById('btn-leave-room').addEventListener('click', () => {
     myPlayerId = null;
     myRoomCode = null;
     latestState = null;
+    applyTheme(homeCharacterSet); // back to the home screen's own toggle, not whatever the room used
     showScreen('home');
   });
 });

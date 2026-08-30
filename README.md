@@ -30,19 +30,39 @@ pedir de ahí. Compensamos con mejor presentación (marcos, sombras, tamaños
 de tarjeta ajustados) en vez de píxeles que la fuente no tiene.
 
 **Personalización antes de empezar** (solo el host, desde la sala de
-espera):
+espera, o el interruptor "Waifus / Chicos" en la propia pantalla de
+inicio):
+- **Personajes**: "Waifus" (el catálogo de anime de siempre) o "Chicos" —
+  60 actores y personajes reales/ficticios (Tom Holland, Chris Hemsworth,
+  Leonardo DiCaprio, Jacob Elordi, personajes de Gossip Girl, Outer Banks,
+  Big Time Rush, futbolistas, etc.), pensado para que quien prefiera
+  subastar chicos en vez de waifus también tenga su versión del juego.
+  Cambiar de modo también cambia el tema visual de toda la app a azul.
 - **Modo de juego**: "Elegir personaje" (el nominador escoge de la lista),
   "Aleatorio" (el personaje de cada turno se sortea al instante), o
   "A ciegas" (se sortea igual que en aleatorio, pero solo se ve el anime —
   el nombre y la imagen del personaje quedan ocultos para todos hasta que
   alguien gana la puja).
-- **Waifus por jugador**: de 3 a 10, en vez del 5 fijo original.
+- **Waifus/chicos por jugador**: de 3 a 10, en vez del 5 fijo original.
+- **Presupuesto inicial**: de $20 a $500 (con botones rápidos +50/+100),
+  en vez de los $100 fijos originales.
 - **Prohibir autovoto**: activado por defecto — nadie puede votar por su
   propia waifu en la ronda de votación.
-- **Incluir personajes troll**: mezcla en la subasta 17 fichajes de broma
-  que no son waifus en absoluto (Tony Tony Chopper, Speedwagon, Ryuk,
-  Saitama, Korosensei, Usopp, Rock Lee, el perro Bond, y más) — apagado por
-  defecto.
+- **Incluir personajes troll**: solo en modo "Waifus". Mezcla en la
+  subasta 17 fichajes de broma que no son waifus en absoluto (Tony Tony
+  Chopper, Speedwagon, Ryuk, Saitama, Korosensei, Usopp, Rock Lee, el
+  perro Bond, y más) — apagado por defecto.
+
+**Imágenes en modo "Chicos"**: se enlazan desde la API pública de
+[Wikipedia](https://es.wikipedia.org) (`upload.wikimedia.org`), que aloja
+fotos con licencia libre justamente para que se puedan reusar así — no se
+redistribuyen copias en este repo, igual que con AniList. Para personajes
+de ficción usamos la foto del actor que los interpreta, ya que los
+artículos de los personajes casi nunca tienen una imagen libre propia.
+Cada nombre de la lista original se verificó a mano (búsqueda + revisión
+visual) antes de incluirlo; 8 de los ~70 nombres pedidos se quedaron fuera
+porque no encontramos una foto libre que identificara con confianza a esa
+persona en concreto.
 
 **Durante la subasta**, cualquiera puede pulsar "Saltar" para decir que no
 le interesa la waifu en juego; en cuanto pujas, ya no puedes saltar. Si

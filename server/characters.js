@@ -241,6 +241,125 @@ const TROLL_CHARACTER_IMAGES = {
   'Zenitsu Agatsuma': 'https://s4.anilist.co/file/anilistcdn/character/large/b129131-FZrQ7lSlxmEr.png',
 };
 
+/**
+ * "Men" mode roster — same auction/voting mechanics, swapped to real and
+ * fictional male actors/characters for players who'd rather draft a
+ * husbando lineup than a waifu one. Portraits are sourced from Wikipedia's
+ * public MediaWiki API (free-licensed images, meant for third-party reuse —
+ * same rationale as using AniList above), preferring the actor's own photo
+ * when a fictional character's page has no free image on file.
+ */
+const MEN_RAW_DATA = [
+  ['Gossip Girl', ['Chuck Bass', 'Nate Archibald']],
+  ['Marvel', ['Sebastian Stan', 'Chris Hemsworth', 'Chris Evans', 'Robert Downey Jr']],
+  ['Spider-Man', ['Tom Holland', 'Andrew Garfield']],
+  ['DC Comics', ['Jason Todd', 'Dick Grayson', 'Oliver Queen', 'Barry Allen']],
+  ['Outer Banks', ['Rafe Cameron', 'JJ Maybank']],
+  ['Elite', ['Gabriel Guevara']],
+  ['Euphoria', ['Jacob Elordi']],
+  ["To All the Boys I've Loved Before", ['Noah Centineo']],
+  ['One Tree Hill', ['Chad Michael Murray']],
+  ['Fast & Furious', ['Paul Walker']],
+  ['Twilight', ['Robert Pattinson']],
+  ['Descendants', ['Harry Hook']],
+  ['Chilling Adventures of Sabrina', ['Charles Gillespie']],
+  ['Teen Wolf', ["Dylan O'Brien", 'Colton Haynes']],
+  ['Maze Runner', ['Thomas Brodie-Sangster']],
+  ['The Summer I Turned Pretty', ['Christopher Briney']],
+  ['Top Gun: Maverick', ['Glenn Powell']],
+  ['Fútbol', ['Pablo Gavi', 'Joao Felix', 'Paulo Dybala']],
+  ['The Hunger Games', ['Finnick Odair']],
+  ['Jonas Brothers', ['Nick Jonas', 'Joe Jonas', 'Kevin Jonas']],
+  ["Grey's Anatomy", ['Mark Sloan']],
+  ['Hollywood', ['Leonardo DiCaprio', 'Brad Pitt', 'Tom Cruise', 'Channing Tatum', 'Ryan Reynolds']],
+  ['Música', ['Maluma', 'Justin Bieber']],
+  ['Zombies', ['Milo Manheim']],
+  ['Baby', ['Lorenzo Zurzolo']],
+  ['Cobra Kai', ['Tanner Buchanan']],
+  ['La Sociedad de la Nieve', ['Enzo Vogrincic']],
+  ['Henry Danger', ['Jace Norman']],
+  ['The Thundermans', ['Jack Griffo']],
+  ['Victorious', ['Avan Jogia']],
+  ['iCarly', ['Nathan Kress']],
+  ['Shadowhunters', ['Matthew Daddario']],
+  ['The Vampire Diaries', ['Ian Somerhalder']],
+  ['Big Time Rush', ['Kendall Knight', 'Logan Mitchell', 'James Diamond', 'Carlos Garcia']],
+  ['Supernatural', ['Dean Winchester']],
+  ['Stranger Things', ['Joe Keery']],
+  ['Smallville', ['Tom Welling']],
+  ['Soy Luna', ['Ruggero Pasquarelli']],
+];
+
+// Portraits sourced from Wikipedia's public MediaWiki API (free-licensed
+// images, meant for third-party reuse). For fictional characters this is
+// usually the actor's own photo, since character-specific articles rarely
+// carry a free image. A handful of names from the original request
+// (Ben Florian, Nuno Gallego, Xander McCormick, Hector Fort, Ronen
+// Rubinstein, Corey Mylchreest, Agustin Bernasconi, Stephen Kalyn) were
+// dropped: no confidently-matching free photo could be found for them.
+const MEN_CHARACTER_IMAGES = {
+  'Andrew Garfield': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg/500px-Andrew_Garfield_82nd_Venice_Film_Festival_%28cropped%29.jpg',
+  'Avan Jogia': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Avan_Jogia_%2833384365238%29_%28cropped%29.jpg/500px-Avan_Jogia_%2833384365238%29_%28cropped%29.jpg',
+  'Barry Allen': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Grant_Gustin_%2855267599668%29.jpg/500px-Grant_Gustin_%2855267599668%29.jpg',
+  'Brad Pitt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Brad_Pitt-69858.jpg/500px-Brad_Pitt-69858.jpg',
+  'Carlos Garcia': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Carlos_Pena_Jr_BTR_Paparazzo.jpg/500px-Carlos_Pena_Jr_BTR_Paparazzo.jpg',
+  'Chad Michael Murray': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Chad_Michael_Murray_at_Nostalgia_Con_Anaheim_2026.jpg/500px-Chad_Michael_Murray_at_Nostalgia_Con_Anaheim_2026.jpg',
+  'Channing Tatum': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg/500px-Channing_Tatum_at_the_2026_Berlin_International_Film_Festival-69843.jpg',
+  'Charles Gillespie': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/CharlieGillespie-byPhilipRomano.jpg/500px-CharlieGillespie-byPhilipRomano.jpg',
+  'Chris Evans': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg/500px-Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg',
+  'Chris Hemsworth': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Chris_Hemsworth_-_Crime_101.jpg/500px-Chris_Hemsworth_-_Crime_101.jpg',
+  'Christopher Briney': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Season_1_bloopers_-_The_Summer_I_Turned_Pretty_04.jpg/500px-Season_1_bloopers_-_The_Summer_I_Turned_Pretty_04.jpg',
+  'Chuck Bass': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ed_Westwick_July_2010_b.jpg/500px-Ed_Westwick_July_2010_b.jpg',
+  'Colton Haynes': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Colton_Haynes_Photo_Op_GalaxyCon_Des_Moines_2025_%28cropped%29.jpg/500px-Colton_Haynes_Photo_Op_GalaxyCon_Des_Moines_2025_%28cropped%29.jpg',
+  'Dean Winchester': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Misha_Collins_%26_Jensen_Ackles_%2848478258422%29%28c%29.jpg/500px-Misha_Collins_%26_Jensen_Ackles_%2848478258422%29%28c%29.jpg',
+  'Dick Grayson': 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Brenton_Thwaites_in_2020.png',
+  "Dylan O'Brien": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/2025_Dylan_O%27Brien_%28cropped%29.jpg/500px-2025_Dylan_O%27Brien_%28cropped%29.jpg",
+  'Enzo Vogrincic': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Enzo_Vogrincic.jpg/500px-Enzo_Vogrincic.jpg',
+  'Finnick Odair': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Sam_Claflin_2014.jpg',
+  'Gabriel Guevara': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Festival_de_M%C3%A1laga_2024_-_Gabriel_Guevara.jpg/500px-Festival_de_M%C3%A1laga_2024_-_Gabriel_Guevara.jpg',
+  'Glenn Powell': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Glen_Powell_by_Gage_Skidmore.jpg/500px-Glen_Powell_by_Gage_Skidmore.jpg',
+  'Harry Hook': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Thomas_Doherty_-_NBTVF_2026-1.jpg/500px-Thomas_Doherty_-_NBTVF_2026-1.jpg',
+  'Ian Somerhalder': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Ian_Somerhalder_Photo_Op_GalaxyCon_Raleigh_2023.jpg/500px-Ian_Somerhalder_Photo_Op_GalaxyCon_Raleigh_2023.jpg',
+  'JJ Maybank': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Rudy_pankow.jpg/500px-Rudy_pankow.jpg',
+  'Jace Norman': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Jace_Norman_2018.png/500px-Jace_Norman_2018.png',
+  'Jack Griffo': 'https://upload.wikimedia.org/wikipedia/commons/3/39/Jack_Griffo_%28cropped%29.jpg',
+  'Jacob Elordi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/JacobElordi-TIFF2025-01_%28cropped_2%29.png/500px-JacobElordi-TIFF2025-01_%28cropped_2%29.png',
+  'James Diamond': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/James_Maslow_2019_%28pujqknUWycM%29.jpg/500px-James_Maslow_2019_%28pujqknUWycM%29.jpg',
+  'Jason Todd': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Curran_Walters_2022_%2851976269344%29_%28cropped%29.jpg/500px-Curran_Walters_2022_%2851976269344%29_%28cropped%29.jpg',
+  'Joao Felix': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Joao_Felix_Croatia_v_Portugal_2_July_2026-007.jpg/500px-Joao_Felix_Croatia_v_Portugal_2_July_2026-007.jpg',
+  'Joe Jonas': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Joe_Jonas_Raleigh_928_%28cropped%29.jpg/500px-Joe_Jonas_Raleigh_928_%28cropped%29.jpg',
+  'Joe Keery': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Joe_Keery_2025.png/500px-Joe_Keery_2025.png',
+  'Justin Bieber': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/P20260719DT-1213_President_Donald_J._Trump_and_First_Lady_Melania_Trump_attend_the_FIFA_World_Cup_Final_%28cropped_2%29.jpg/500px-P20260719DT-1213_President_Donald_J._Trump_and_First_Lady_Melania_Trump_attend_the_FIFA_World_Cup_Final_%28cropped_2%29.jpg',
+  'Kendall Knight': 'https://upload.wikimedia.org/wikipedia/commons/3/30/KendallSchmidt2013.jpg',
+  'Kevin Jonas': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Jonas_Brothers_4th_of_July_Show_Taping_in_Cleveland_%2851277076286%29_%28cropped%29.jpg/500px-Jonas_Brothers_4th_of_July_Show_Taping_in_Cleveland_%2851277076286%29_%28cropped%29.jpg',
+  'Leonardo DiCaprio': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/LeoPTABFI191125-28_%28cropped%29.jpg/500px-LeoPTABFI191125-28_%28cropped%29.jpg',
+  'Logan Mitchell': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Logan_Henderson_2025_Madrid.jpg/500px-Logan_Henderson_2025_Madrid.jpg',
+  'Lorenzo Zurzolo': 'https://upload.wikimedia.org/wikipedia/commons/7/71/Lorenzo_Zurzolo_Funweek.it_2025.png',
+  'Maluma': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/2023-11-16_Gala_de_los_Latin_Grammy%2C_20_%28Maluma%29.jpg/500px-2023-11-16_Gala_de_los_Latin_Grammy%2C_20_%28Maluma%29.jpg',
+  'Mark Sloan': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Eric_Dane_%2835417208454%29_%28cropped%29.jpg/500px-Eric_Dane_%2835417208454%29_%28cropped%29.jpg',
+  'Matthew Daddario': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Matthew_Daddario_Wondercon_2016.jpg/500px-Matthew_Daddario_Wondercon_2016.jpg',
+  'Milo Manheim': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Milo_Manheim_2019.jpg/500px-Milo_Manheim_2019.jpg',
+  'Nate Archibald': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/3_-_Chace_Crawford_-_Gossip_Girl_Fan_Meet_-_March_31%2C_2024_at_the_XOXO_Fan_Meet_by_People_Convention_%28Portrait%29_%28cropped%29.jpg/500px-3_-_Chace_Crawford_-_Gossip_Girl_Fan_Meet_-_March_31%2C_2024_at_the_XOXO_Fan_Meet_by_People_Convention_%28Portrait%29_%28cropped%29.jpg',
+  'Nathan Kress': 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Nathan_Kress_in_2022.png',
+  'Nick Jonas': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Nick_Jonas_at_DIFF_2026.jpg/500px-Nick_Jonas_at_DIFF_2026.jpg',
+  'Noah Centineo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Noah_Centineo_by_Gage_Skidmore.jpg/500px-Noah_Centineo_by_Gage_Skidmore.jpg',
+  'Oliver Queen': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Stephen_Amell_%2852773145678%29.jpg/500px-Stephen_Amell_%2852773145678%29.jpg',
+  'Pablo Gavi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Gavi_Argentina_v_Spain_19_July_2026-013.jpg/500px-Gavi_Argentina_v_Spain_19_July_2026-013.jpg',
+  'Paul Walker': 'https://upload.wikimedia.org/wikipedia/commons/9/91/PaulWalkerEdit-1.jpg',
+  'Paulo Dybala': 'https://upload.wikimedia.org/wikipedia/commons/b/b3/%D0%9C%D0%B0%D1%82%D1%87_%C2%AB%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%BE%C2%BB_-_%C2%AB%D0%AE%D0%B2%D0%B5%D0%BD%D1%82%D1%83%D1%81%C2%BB_0-2._20_%D0%BE%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F_2020_%D0%B3%D0%BE%D0%B4%D0%B0_%E2%80%94_1153905_%28cropped%29.jpg',
+  'Rafe Cameron': 'https://upload.wikimedia.org/wikipedia/commons/b/be/Drew_Starkey_at_81st_Venice_International_Film_Festival.jpg',
+  'Robert Downey Jr': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg/500px-RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg',
+  'Robert Pattinson': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Robert_Pattinson_at_Berlinale_2025.jpg/500px-Robert_Pattinson_at_Berlinale_2025.jpg',
+  'Ruggero Pasquarelli': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Ruggero_Pasquarelli_in_2016.jpg',
+  'Ryan Reynolds': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg/500px-Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg',
+  'Sebastian Stan': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Sebastian_Stan-64526.jpg/500px-Sebastian_Stan-64526.jpg',
+  'Tanner Buchanan': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Tanner_Buchanan_%2828000180628%29_%28cropped%29.jpg/500px-Tanner_Buchanan_%2828000180628%29_%28cropped%29.jpg',
+  'Thomas Brodie-Sangster': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Thomas_Brodie-Sangster_by_Gage_Skidmore_2.jpg/500px-Thomas_Brodie-Sangster_by_Gage_Skidmore_2.jpg',
+  'Tom Cruise': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg/500px-Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg',
+  'Tom Holland': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/TomHolland-byPhilipRomano.jpg/500px-TomHolland-byPhilipRomano.jpg',
+  'Tom Welling': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Tom_Welling_at_Galaxy_Con_Richmond.jpg/500px-Tom_Welling_at_Galaxy_Con_Richmond.jpg',
+};
+
 function slugify(str) {
   return str
     .toLowerCase()
@@ -261,34 +380,27 @@ function colorFor(str) {
   return `hsl(${hue} 70% 55%)`;
 }
 
-const CHARACTERS = [];
-for (const [anime, names] of RAW_DATA) {
-  const animeColor = colorFor(anime);
-  for (const name of names) {
-    CHARACTERS.push({
-      id: `${slugify(anime)}__${slugify(name)}`,
-      name,
-      anime,
-      color: animeColor,
-      image: CHARACTER_IMAGES[name] || null,
-    });
+function buildCharacters(rawData, imageMap, extraFields = {}) {
+  const list = [];
+  for (const [group, names] of rawData) {
+    const groupColor = colorFor(group);
+    for (const name of names) {
+      list.push({
+        id: `${slugify(group)}__${slugify(name)}`,
+        name,
+        anime: group,
+        color: groupColor,
+        image: imageMap[name] || null,
+        ...extraFields,
+      });
+    }
   }
+  return list;
 }
 
-const TROLL_CHARACTERS = [];
-for (const [anime, names] of TROLL_RAW_DATA) {
-  const animeColor = colorFor(anime);
-  for (const name of names) {
-    TROLL_CHARACTERS.push({
-      id: `${slugify(anime)}__${slugify(name)}`,
-      name,
-      anime,
-      color: animeColor,
-      image: TROLL_CHARACTER_IMAGES[name] || null,
-      isTroll: true,
-    });
-  }
-}
+const CHARACTERS = buildCharacters(RAW_DATA, CHARACTER_IMAGES);
+const TROLL_CHARACTERS = buildCharacters(TROLL_RAW_DATA, TROLL_CHARACTER_IMAGES, { isTroll: true });
+const MEN_CHARACTERS = buildCharacters(MEN_RAW_DATA, MEN_CHARACTER_IMAGES);
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -298,10 +410,15 @@ function shuffle(arr) {
   return arr;
 }
 
-function freshPool({ includeTroll = false } = {}) {
+function freshPool({ includeTroll = false, characterSet = 'waifu' } = {}) {
   // Return a shuffled deep copy so each room gets its own independent order.
-  const source = includeTroll ? [...CHARACTERS, ...TROLL_CHARACTERS] : CHARACTERS;
+  let source;
+  if (characterSet === 'men') {
+    source = MEN_CHARACTERS; // no troll sub-pool for this set
+  } else {
+    source = includeTroll ? [...CHARACTERS, ...TROLL_CHARACTERS] : CHARACTERS;
+  }
   return shuffle(source.map((c) => ({ ...c })));
 }
 
-module.exports = { CHARACTERS, TROLL_CHARACTERS, freshPool };
+module.exports = { CHARACTERS, TROLL_CHARACTERS, MEN_CHARACTERS, freshPool };

@@ -3,7 +3,9 @@
 const crypto = require('crypto');
 const { freshPool } = require('./characters');
 
-const STARTING_BUDGET = 100;
+const DEFAULT_STARTING_BUDGET = 100;
+const MIN_STARTING_BUDGET = 20;
+const MAX_STARTING_BUDGET = 500;
 const DEFAULT_ROSTER_SIZE = 5;
 const MIN_ROSTER_SIZE = 3;
 const MAX_ROSTER_SIZE = 10;
@@ -38,7 +40,9 @@ class Room {
       mode: 'choice', // choice (nominator picks) | random (auto-picked) | blind (auto-picked + hidden until won)
       noSelfVote: true, // players can't vote for their own submitted waifu
       rosterSize: DEFAULT_ROSTER_SIZE, // waifus each player collects before voting starts
-      includeTroll: false, // mix in joke/mascot characters (Chopper, Ryuk, etc.)
+      includeTroll: false, // mix in joke/mascot characters (Chopper, Ryuk, etc.) — waifu set only
+      startingBudget: DEFAULT_STARTING_BUDGET, // $ each player starts the auction with
+      characterSet: 'waifu', // waifu | men — which catalog freshPool() draws from
     };
     this.createdAt = Date.now();
     this.lastActivity = Date.now();
@@ -67,7 +71,7 @@ class Room {
       name: finalName,
       socketId,
       connected: true,
-      budget: STARTING_BUDGET,
+      budget: this.settings.startingBudget,
       roster: [], // { id, name, anime, color, price }
       isHost: this.players.size === 0,
     };
@@ -178,6 +182,20 @@ class Room {
       }
       next.rosterSize = size;
     }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'startingBudget')) {
+      const budget = Math.floor(Number(patch.startingBudget));
+      if (!Number.isFinite(budget) || budget < MIN_STARTING_BUDGET || budget > MAX_STARTING_BUDGET) {
+        return { ok: false, error: 'invalid_starting_budget' };
+      }
+      next.startingBudget = budget;
+    }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'characterSet')) {
+      if (!['waifu', 'men'].includes(patch.characterSet)) {
+        return { ok: false, error: 'invalid_character_set' };
+      }
+      next.characterSet = patch.characterSet;
+      if (patch.characterSet !== 'waifu') next.includeTroll = false; // no troll roster for other sets
+    }
     this.settings = next;
     this.touch();
     this._emit();
@@ -189,7 +207,10 @@ class Room {
   startAuction() {
     if (!this.canStart()) return false;
     this.phase = 'auction';
-    this.pool = freshPool({ includeTroll: this.settings.includeTroll });
+    // Re-sync in case the host changed the budget after someone had already
+    // joined with the old default baked into their player object.
+    for (const p of this.players.values()) p.budget = this.settings.startingBudget;
+    this.pool = freshPool({ includeTroll: this.settings.includeTroll, characterSet: this.settings.characterSet });
     this.auction = {
       nominatorIndex: 0,
       stage: 'nominating', // nominating | bidding | result
@@ -530,7 +551,7 @@ class Room {
     this.voting = null;
     this.results = null;
     for (const p of this.players.values()) {
-      p.budget = STARTING_BUDGET;
+      p.budget = this.settings.startingBudget;
       p.roster = [];
     }
     this.touch();
@@ -629,4 +650,12 @@ class Room {
   }
 }
 
-module.exports = { Room, STARTING_BUDGET, DEFAULT_ROSTER_SIZE, MIN_ROSTER_SIZE, MAX_ROSTER_SIZE };
+module.exports = {
+  Room,
+  DEFAULT_STARTING_BUDGET,
+  MIN_STARTING_BUDGET,
+  MAX_STARTING_BUDGET,
+  DEFAULT_ROSTER_SIZE,
+  MIN_ROSTER_SIZE,
+  MAX_ROSTER_SIZE,
+};

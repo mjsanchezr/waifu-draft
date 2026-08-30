@@ -62,10 +62,11 @@ io.on('connection', (socket) => {
     socket.join(room.code);
   }
 
-  socket.on('createRoom', ({ name } = {}, ack) => {
+  socket.on('createRoom', ({ name, characterSet } = {}, ack) => {
     const room = createRoom();
     const player = room.addPlayer(name, socket.id);
     joinSocketToRoom(room, player);
+    if (characterSet === 'men') room.updateSettings(player.id, { characterSet: 'men' });
     ack && ack({ ok: true, roomCode: room.code, playerId: player.id });
     broadcast(room);
   });

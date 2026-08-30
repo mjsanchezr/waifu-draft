@@ -1,5 +1,6 @@
 :root {
   --bg: #120c1e;
+  --bg-rgb: 18, 12, 30;
   --bg-alt: #1c1430;
   --card: #221936;
   --card-hi: #2c2145;
@@ -11,8 +12,25 @@
   --bad: #f87171;
   --warn: #fbbf24;
   --border: #3a2c5c;
+  --bg-glow: #341f52;
   --radius: 14px;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* "Men" mode reskin — same layout, blue accent + background instead of the
+   default pink/purple, toggled from the home screen or lobby settings. */
+body.theme-men {
+  --bg: #0a1526;
+  --bg-rgb: 10, 21, 38;
+  --bg-alt: #10203a;
+  --card: #142a4a;
+  --card-hi: #1c3760;
+  --text: #eaf2ff;
+  --text-dim: #9db3d6;
+  --accent: #38bdf8;
+  --accent-2: #3b5bfa;
+  --border: #274874;
+  --bg-glow: #123a63;
 }
 
 * { box-sizing: border-box; }
@@ -21,7 +39,7 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: radial-gradient(circle at 20% -10%, #341f52 0%, var(--bg) 55%);
+  background: radial-gradient(circle at 20% -10%, var(--bg-glow) 0%, var(--bg) 55%);
   color: var(--text);
 }
 
@@ -132,8 +150,8 @@ label {
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 34%, rgba(18, 12, 30, 0.35) 0%, rgba(18, 12, 30, 0.72) 58%, var(--bg) 100%),
-    linear-gradient(to bottom, rgba(18, 12, 30, 0.25) 0%, rgba(18, 12, 30, 0.55) 70%, rgba(18, 12, 30, 0.85) 100%);
+    radial-gradient(circle at 50% 34%, rgba(var(--bg-rgb), 0.35) 0%, rgba(var(--bg-rgb), 0.72) 58%, var(--bg) 100%),
+    linear-gradient(to bottom, rgba(var(--bg-rgb), 0.25) 0%, rgba(var(--bg-rgb), 0.55) 70%, rgba(var(--bg-rgb), 0.85) 100%);
 }
 @keyframes backdrop-fade-in {
   from { opacity: 0; }
@@ -172,6 +190,7 @@ label {
 }
 .home-card h1 { font-size: 2.1rem; }
 .tagline { color: var(--text-dim); margin-bottom: 20px; }
+#character-set-toggle { justify-content: center; margin: 0 auto 16px; width: fit-content; }
 .tabs { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
 .tab {
   background: transparent;
@@ -365,6 +384,14 @@ label {
   font-weight: 700;
   font-size: 1.05rem;
 }
+
+.budget-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.budget-controls .stepper-value { min-width: 3.2em; }
 
 .player-list li {
   display: flex;
