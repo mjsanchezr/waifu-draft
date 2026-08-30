@@ -392,6 +392,7 @@ label {
   flex-wrap: wrap;
 }
 .budget-controls .stepper-value { min-width: 3.2em; }
+#budget-big-chips, #budget-big-chips-2 { display: inline-flex; gap: 8px; }
 
 .player-list li {
   display: flex;

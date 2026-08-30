@@ -4,8 +4,10 @@ const crypto = require('crypto');
 const { freshPool } = require('./characters');
 
 const DEFAULT_STARTING_BUDGET = 100;
-const MIN_STARTING_BUDGET = 20;
-const MAX_STARTING_BUDGET = 500;
+const BUDGET_RANGE = {
+  money: { min: 20, max: 500 },
+  shots: { min: 5, max: 10 },
+};
 const DEFAULT_ROSTER_SIZE = 5;
 const MIN_ROSTER_SIZE = 3;
 const MAX_ROSTER_SIZE = 10;
@@ -41,7 +43,8 @@ class Room {
       noSelfVote: true, // players can't vote for their own submitted waifu
       rosterSize: DEFAULT_ROSTER_SIZE, // waifus each player collects before voting starts
       includeTroll: false, // mix in joke/mascot characters (Chopper, Ryuk, etc.) — waifu set only
-      startingBudget: DEFAULT_STARTING_BUDGET, // $ each player starts the auction with
+      startingBudget: DEFAULT_STARTING_BUDGET, // amount each player starts the auction with
+      currency: 'money', // money ($20-$500) | shots (5-10) — what the "budget" actually represents
       characterSet: 'waifu', // waifu | men — which catalog freshPool() draws from
     };
     this.createdAt = Date.now();
@@ -182,9 +185,21 @@ class Room {
       }
       next.rosterSize = size;
     }
+    if (patch && Object.prototype.hasOwnProperty.call(patch, 'currency')) {
+      if (!['money', 'shots'].includes(patch.currency)) {
+        return { ok: false, error: 'invalid_currency' };
+      }
+      next.currency = patch.currency;
+      // Snap the budget into the new currency's range so switching (e.g.
+      // money's $100 default) into shots mode doesn't leave a value miles
+      // outside 5-10 until someone happens to also touch the stepper.
+      const range = BUDGET_RANGE[next.currency];
+      next.startingBudget = Math.min(range.max, Math.max(range.min, next.startingBudget));
+    }
     if (patch && Object.prototype.hasOwnProperty.call(patch, 'startingBudget')) {
       const budget = Math.floor(Number(patch.startingBudget));
-      if (!Number.isFinite(budget) || budget < MIN_STARTING_BUDGET || budget > MAX_STARTING_BUDGET) {
+      const range = BUDGET_RANGE[next.currency];
+      if (!Number.isFinite(budget) || budget < range.min || budget > range.max) {
         return { ok: false, error: 'invalid_starting_budget' };
       }
       next.startingBudget = budget;
@@ -653,8 +668,7 @@ class Room {
 module.exports = {
   Room,
   DEFAULT_STARTING_BUDGET,
-  MIN_STARTING_BUDGET,
-  MAX_STARTING_BUDGET,
+  BUDGET_RANGE,
   DEFAULT_ROSTER_SIZE,
   MIN_ROSTER_SIZE,
   MAX_ROSTER_SIZE,

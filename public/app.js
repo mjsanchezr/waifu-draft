@@ -176,6 +176,11 @@ function playerName(state, playerId) {
   return p ? p.name : '???';
 }
 
+function formatMoney(amount, currency) {
+  if (currency === 'shots') return `${amount} shot${amount === 1 ? '' : 's'}`;
+  return `$${amount}`;
+}
+
 // ---------- timers ----------
 
 const timers = {};
@@ -315,7 +320,7 @@ function renderPlayersTopbar(elId, state, opts = {}) {
         const style = owned ? ` style="background-image:url('${owned.image || ''}')"` : '';
         return `<span class="slot-dot ${owned ? 'filled' : ''}"${style} title="${owned ? escapeHtml(owned.name) : ''}"></span>`;
       }).join('');
-      extra = `<div class="pc-budget">$${p.budget}</div><div class="pc-slots">${slots}</div>`;
+      extra = `<div class="pc-budget">${formatMoney(p.budget, state.settings.currency)}</div><div class="pc-slots">${slots}</div>`;
     }
 
     chip.innerHTML = `
@@ -359,9 +364,13 @@ function renderLobby(state) {
 
 const ROSTER_SIZE_MIN = 3;
 const ROSTER_SIZE_MAX = 10;
-const BUDGET_MIN = 20;
-const BUDGET_MAX = 500;
-const BUDGET_STEP = 10;
+const BUDGET_RANGE = {
+  money: { min: 20, max: 500, step: 10 },
+  shots: { min: 5, max: 10, step: 1 },
+};
+function budgetRangeFor(currency) {
+  return BUDGET_RANGE[currency] || BUDGET_RANGE.money;
+}
 
 function renderSettingsPanel(state, isHost) {
   const settings = state.settings || {
@@ -370,6 +379,7 @@ function renderSettingsPanel(state, isHost) {
     rosterSize: 5,
     includeTroll: false,
     startingBudget: 100,
+    currency: 'money',
     characterSet: 'waifu',
   };
 
@@ -387,9 +397,26 @@ function renderSettingsPanel(state, isHost) {
   document.getElementById('roster-size-minus').disabled = !isHost || settings.rosterSize <= ROSTER_SIZE_MIN;
   document.getElementById('roster-size-plus').disabled = !isHost || settings.rosterSize >= ROSTER_SIZE_MAX;
 
-  document.getElementById('budget-value').textContent = `$${settings.startingBudget}`;
-  document.getElementById('budget-minus').disabled = !isHost || settings.startingBudget <= BUDGET_MIN;
-  document.getElementById('budget-plus').disabled = !isHost || settings.startingBudget >= BUDGET_MAX;
+  document.querySelectorAll('#currency-segmented .segmented-option').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.currency === settings.currency);
+    btn.disabled = !isHost;
+  });
+
+  const isShots = settings.currency === 'shots';
+  document.getElementById('budget-label').textContent = isShots ? 'Shots iniciales' : 'Presupuesto inicial';
+  document.getElementById('budget-hint').textContent = isShots
+    ? 'Shots con los que empieza cada jugador (entre 5 y 10). Bebe con responsabilidad.'
+    : 'Dinero con el que empieza cada jugador (entre $20 y $500).';
+  document.getElementById('currency-hint').textContent = isShots
+    ? 'Pujando con shots en vez de dinero. Recuerda beber con responsabilidad.'
+    : 'Con qué se puja: dinero ficticio o shots (bebida) — juega con responsabilidad.';
+  document.getElementById('budget-big-chips').classList.toggle('hidden', isShots);
+  document.getElementById('budget-big-chips-2').classList.toggle('hidden', isShots);
+
+  const range = budgetRangeFor(settings.currency);
+  document.getElementById('budget-value').textContent = formatMoney(settings.startingBudget, settings.currency);
+  document.getElementById('budget-minus').disabled = !isHost || settings.startingBudget <= range.min;
+  document.getElementById('budget-plus').disabled = !isHost || settings.startingBudget >= range.max;
   document.querySelectorAll('[data-budget-delta]').forEach((btn) => { btn.disabled = !isHost; });
 
   const selfVoteCheckbox = document.getElementById('setting-no-self-vote');
@@ -417,6 +444,15 @@ document.querySelectorAll('#mode-segmented .segmented-option').forEach((btn) => 
   btn.addEventListener('click', () => {
     if (btn.disabled) return;
     socket.emit('updateSettings', { mode: btn.dataset.mode }, (res) => {
+      if (!res.ok) toast(errorMessage(res.error), true);
+    });
+  });
+});
+
+document.querySelectorAll('#currency-segmented .segmented-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    socket.emit('updateSettings', { currency: btn.dataset.currency }, (res) => {
       if (!res.ok) toast(errorMessage(res.error), true);
     });
   });
@@ -453,14 +489,21 @@ document.getElementById('roster-size-plus').addEventListener('click', () => nudg
 
 function nudgeBudget(delta) {
   if (!latestState || !latestState.settings) return;
-  const next = Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, latestState.settings.startingBudget + delta));
+  const range = budgetRangeFor(latestState.settings.currency);
+  const next = Math.min(range.max, Math.max(range.min, latestState.settings.startingBudget + delta));
   if (next === latestState.settings.startingBudget) return;
   socket.emit('updateSettings', { startingBudget: next }, (res) => {
     if (!res.ok) toast(errorMessage(res.error), true);
   });
 }
-document.getElementById('budget-minus').addEventListener('click', () => nudgeBudget(-BUDGET_STEP));
-document.getElementById('budget-plus').addEventListener('click', () => nudgeBudget(BUDGET_STEP));
+document.getElementById('budget-minus').addEventListener('click', () => {
+  const step = latestState ? budgetRangeFor(latestState.settings.currency).step : 10;
+  nudgeBudget(-step);
+});
+document.getElementById('budget-plus').addEventListener('click', () => {
+  const step = latestState ? budgetRangeFor(latestState.settings.currency).step : 10;
+  nudgeBudget(step);
+});
 document.querySelectorAll('[data-budget-delta]').forEach((btn) => {
   btn.addEventListener('click', () => nudgeBudget(parseInt(btn.dataset.budgetDelta, 10)));
 });
@@ -544,11 +587,18 @@ function renderAuction(state) {
       document.getElementById('char-name').textContent = a.character.name;
       trollBadge.classList.toggle('hidden', !a.character.isTroll);
     }
+    const currency = state.settings.currency;
+    const quickDeltas = currency === 'shots' ? [1, 2, 3] : [1, 5, 10];
+    ['bid-delta-1', 'bid-delta-2', 'bid-delta-3'].forEach((id, i) => {
+      const btn = document.getElementById(id);
+      btn.dataset.bidDelta = String(quickDeltas[i]);
+      btn.textContent = currency === 'shots' ? `+${quickDeltas[i]}` : `+$${quickDeltas[i]}`;
+    });
     document.getElementById('char-anime').textContent = a.character.anime;
-    document.getElementById('bid-amount').textContent = `$${a.highestBid}`;
+    document.getElementById('bid-amount').textContent = formatMoney(a.highestBid, currency);
     document.getElementById('bid-leader').textContent = a.highestBidderId
       ? `${playerName(state, a.highestBidderId)} va ganando`
-      : 'Sin pujas todavía — mínimo $1';
+      : `Sin pujas todavía — mínimo ${formatMoney(1, currency)}`;
 
     const rosterSize = state.settings.rosterSize;
     const controls = document.getElementById('bid-controls');
@@ -556,7 +606,7 @@ function renderAuction(state) {
     if (me && me.roster.length < rosterSize && me.connected) {
       controls.classList.remove('hidden');
       const max = maxAffordableBid(me, rosterSize);
-      help.textContent = `Tu presupuesto: $${me.budget} · Máximo que puedes pujar ahora: $${max}`;
+      help.textContent = `Tu presupuesto: ${formatMoney(me.budget, currency)} · Máximo que puedes pujar ahora: ${formatMoney(max, currency)}`;
       document.getElementById('bid-input').max = String(max);
     } else {
       controls.classList.add('hidden');
@@ -569,7 +619,7 @@ function renderAuction(state) {
     log.innerHTML = a.bidLog
       .slice()
       .reverse()
-      .map((b) => `<div>${escapeHtml(playerName(state, b.playerId))} pujó $${b.amount}</div>`)
+      .map((b) => `<div>${escapeHtml(playerName(state, b.playerId))} pujó ${formatMoney(b.amount, currency)}</div>`)
       .join('');
 
     renderSkipButton(state, a);
@@ -583,7 +633,7 @@ function renderAuction(state) {
     document.getElementById('result-name').textContent = r.character.name;
     document.getElementById('result-troll-badge').classList.toggle('hidden', !r.character.isTroll);
     document.getElementById('result-title').textContent = r.winnerId
-      ? `¡Se la lleva ${playerName(state, r.winnerId)} por $${r.price}!`
+      ? `¡Se la lleva ${playerName(state, r.winnerId)} por ${formatMoney(r.price, state.settings.currency)}!`
       : `Nadie pujó. Vuelve a la reserva.`;
   }
 }
@@ -764,11 +814,11 @@ function renderResults(state) {
         .map(
           (c) => `<div class="rb-item">
             <span class="rb-left"><img class="rb-thumb" src="${c.image || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /> ${escapeHtml(c.name)} (${escapeHtml(c.anime)}) ${c.isTroll ? '<span class="troll-badge">TROLL</span>' : ''}</span>
-            <span>$${c.price}</span>
+            <span>${formatMoney(c.price, state.settings.currency)}</span>
           </div>`
         )
         .join('');
-      return `<div class="roster-block"><h3>${escapeHtml(s.name)} · $${s.budgetLeft} sin gastar</h3>${items}</div>`;
+      return `<div class="roster-block"><h3>${escapeHtml(s.name)} · ${formatMoney(s.budgetLeft, state.settings.currency)} sin gastar</h3>${items}</div>`;
     })
     .join('');
 

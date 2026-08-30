@@ -44,8 +44,9 @@ inicio):
   el nombre y la imagen del personaje quedan ocultos para todos hasta que
   alguien gana la puja).
 - **Waifus/chicos por jugador**: de 3 a 10, en vez del 5 fijo original.
-- **Presupuesto inicial**: de $20 a $500 (con botones rápidos +50/+100),
-  en vez de los $100 fijos originales.
+- **Moneda de la subasta**: "Dinero" ($20-$500, con botones rápidos
+  +50/+100) o "Shots" (5-10) — para jugarlo como juego de beber, pujando
+  tragos en vez de dólares. Bebe con responsabilidad.
 - **Prohibir autovoto**: activado por defecto — nadie puede votar por su
   propia waifu en la ronda de votación.
 - **Incluir personajes troll**: solo en modo "Waifus". Mezcla en la

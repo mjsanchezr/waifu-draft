@@ -125,19 +125,34 @@
 
         <div class="setting-row setting-row-stack">
           <div class="setting-label">
-            <span>Presupuesto inicial</span>
-            <span class="hint">Dinero con el que empieza cada jugador (entre $20 y $500).</span>
+            <span>Moneda de la subasta</span>
+            <span class="hint" id="currency-hint">Con qué se puja: dinero ficticio o shots (bebida) — juega con responsabilidad.</span>
+          </div>
+          <div class="segmented" id="currency-segmented">
+            <button type="button" class="segmented-option" data-currency="money">Dinero</button>
+            <button type="button" class="segmented-option" data-currency="shots">Shots</button>
+          </div>
+        </div>
+
+        <div class="setting-row setting-row-stack">
+          <div class="setting-label">
+            <span id="budget-label">Presupuesto inicial</span>
+            <span class="hint" id="budget-hint">Dinero con el que empieza cada jugador (entre $20 y $500).</span>
           </div>
           <div class="budget-controls">
-            <button type="button" class="btn tiny chip" data-budget-delta="-100">−100</button>
-            <button type="button" class="btn tiny chip" data-budget-delta="-50">−50</button>
+            <span id="budget-big-chips">
+              <button type="button" class="btn tiny chip" data-budget-delta="-100">−100</button>
+              <button type="button" class="btn tiny chip" data-budget-delta="-50">−50</button>
+            </span>
             <div class="stepper" id="budget-stepper">
               <button type="button" class="btn tiny stepper-btn" id="budget-minus" aria-label="Menos">−</button>
               <span class="stepper-value" id="budget-value">$100</span>
               <button type="button" class="btn tiny stepper-btn" id="budget-plus" aria-label="Más">+</button>
             </div>
-            <button type="button" class="btn tiny chip" data-budget-delta="50">+50</button>
-            <button type="button" class="btn tiny chip" data-budget-delta="100">+100</button>
+            <span id="budget-big-chips-2">
+              <button type="button" class="btn tiny chip" data-budget-delta="50">+50</button>
+              <button type="button" class="btn tiny chip" data-budget-delta="100">+100</button>
+            </span>
           </div>
         </div>
 
@@ -206,9 +221,9 @@
           </div>
         </div>
         <div id="bid-controls" class="bid-controls">
-          <button class="btn chip" data-bid-delta="1">+$1</button>
-          <button class="btn chip" data-bid-delta="5">+$5</button>
-          <button class="btn chip" data-bid-delta="10">+$10</button>
+          <button class="btn chip" id="bid-delta-1" data-bid-delta="1">+$1</button>
+          <button class="btn chip" id="bid-delta-2" data-bid-delta="5">+$5</button>
+          <button class="btn chip" id="bid-delta-3" data-bid-delta="10">+$10</button>
           <button class="btn chip" id="btn-bid-max">Máximo</button>
           <div class="bid-custom">
             <input type="number" id="bid-input" min="1" step="1" />
